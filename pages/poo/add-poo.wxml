@@ -1,0 +1,128 @@
+<view class="page">
+  <view class="head">
+    <text class="title">记录便便</text>
+  </view>
+
+  <!-- 排便信息 -->
+  <view class="card">
+    <view class="info-row">
+      <text class="info-label">📅 日期</text>
+      <text class="info-val">{{date}}</text>
+    </view>
+    <view class="info-div"></view>
+    <view class="info-row">
+      <text class="info-label">⏰ 时间</text>
+      <picker mode="time" value="{{time}}" bindchange="onTimeChange">
+        <text class="info-val link">{{time}} ▾</text>
+      </picker>
+    </view>
+    <view class="info-div"></view>
+    <view class="info-row-block">
+      <text class="info-label">⏱ 时长</text>
+      <view class="tag-wrap">
+        <view
+          class="tag {{durationIndex === index ? 'tag-on' : ''}}"
+          wx:for="{{durations}}"
+          wx:key="*this"
+          data-idx="{{index}}"
+          bindtap="pickDuration"
+        >{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 便便颜色 -->
+  <view class="card">
+    <text class="card-title">🎨 便便颜色</text>
+    <view class="color-grid">
+      <view
+        class="color-item {{colorIndex === index ? 'active' : ''}}"
+        wx:for="{{colors}}"
+        wx:key="name"
+        data-idx="{{index}}"
+        bindtap="pickColor"
+      >
+        <view class="color-circle" style="background:{{item.hex}}"></view>
+        <text class="color-name">{{item.name}}</text>
+        <view class="color-check" wx:if="{{colorIndex === index}}">✓</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 便便形态 -->
+  <view class="card">
+    <text class="card-title">💩 便便形态</text>
+    <view class="form-list">
+      <view
+        class="form-item {{formIndex === index ? 'active' : ''}}"
+        wx:for="{{forms}}"
+        wx:key="num"
+        data-idx="{{index}}"
+        bindtap="pickForm"
+      >
+        <view class="form-num">{{item.num}}</view>
+        <view class="form-info">
+          <text class="form-name">{{item.name}}</text>
+          <text class="form-desc">{{item.desc}}</text>
+        </view>
+        <view class="form-check" wx:if="{{formIndex === index}}">✓</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 便便气味 -->
+  <view class="card">
+    <text class="card-title">👃 便便气味</text>
+    <view class="tag-wrap">
+      <view
+        class="tag {{smellIndex === index ? 'tag-on' : ''}}"
+        wx:for="{{smells}}"
+        wx:key="*this"
+        data-idx="{{index}}"
+        bindtap="pickSmell"
+      >{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 排便感受 -->
+  <view class="card">
+    <text class="card-title">😌 排便感受</text>
+    <view class="tag-wrap">
+      <view
+        class="tag {{feelingIndex === index ? 'tag-on' : ''}}"
+        wx:for="{{feelings}}"
+        wx:key="*this"
+        data-idx="{{index}}"
+        bindtap="pickFeeling"
+      >{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 备注 -->
+  <view class="card">
+    <text class="card-title">📝 备注（选填）</text>
+    <view class="note-box">
+      <input
+        class="note-input"
+        placeholder="餐后、腹痛、其他..."
+        placeholder-class="ph"
+        value="{{note}}"
+        bindinput="onNote"
+      />
+    </view>
+  </view>
+
+  <view style="height:220rpx"></view>
+
+  <view class="fix-bar">
+    <button class="save-btn" bindtap="save">保存记录</button>
+  </view>
+
+  <!-- ========== 自定义 Toast ========== -->
+  <view class="toast-wrap {{showToast ? 'show' : ''}} {{toastHiding ? 'hiding' : ''}}" wx:if="{{showToast}}">
+    <view class="toast-box">
+      <text class="toast-emoji">{{toastEmoji}}</text>
+      <text class="toast-text">{{toastText}}</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,167 @@
+<view class="page">
+  <!-- 日历 -->
+  <view class="head">
+    <text class="title">便便记录</text>
+  </view>
+
+  <view class="calendar">
+    <view class="month-row">
+      <text class="month-btn" bindtap="prevMonth">{{preMonth}}</text>
+      <text class="month-now">{{nowYear}}年{{nowMonth}}月</text>
+      <text class="month-btn" bindtap="nextMonth">{{nextMonth}}</text>
+    </view>
+
+    <view class="week-row">
+      <text class="week-cell" wx:for="{{weekList}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <view class="day-grid">
+      <view
+        wx:for="{{dayList}}"
+        wx:key="id"
+        class="day-cell {{item.isToday ? 'today' : ''}} {{item.isSel ? 'sel' : ''}} {{!item.day ? 'empty' : ''}}"
+        data-day="{{item.day}}"
+        data-ds="{{item.ds}}"
+        bindtap="tapDay"
+      >
+        <text class="day-num" wx:if="{{item.day}}">{{item.day}}</text>
+        <view class="dot" wx:if="{{item.hasLog}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 选中日期记录列表 -->
+  <view class="record-section" wx:if="{{selectDate}}">
+    <view class="record-header">
+      <text class="record-date">{{selectDate}}</text>
+      <text class="record-count" wx:if="{{selectedRecords.length}}">共{{selectedRecords.length}}条</text>
+    </view>
+
+    <view wx:if="{{selectedRecords.length}}">
+      <view
+        class="record-card"
+        wx:for="{{selectedRecords}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="viewRecord"
+      >
+        <view class="rc-top">
+          <view class="rc-time-row">
+            <view class="rc-color-dot" style="background:{{item.colorHex}}"></view>
+            <text class="rc-time">{{item.time}}</text>
+            <text class="rc-dur" wx:if="{{item.durationName !== '未记录'}}">{{item.durationName}}</text>
+          </view>
+          <view class="rc-arrow">›</view>
+        </view>
+        <view class="rc-tags">
+          <text class="rc-tag main" wx:if="{{item.formName !== '未记录'}}">Type {{item.formNum}} · {{item.formName}}</text>
+          <text class="rc-tag" wx:if="{{item.colorName !== '未记录'}}">{{item.colorName}}</text>
+          <text class="rc-tag" wx:if="{{item.smellName !== '未记录'}}">{{item.smellName}}</text>
+          <text class="rc-tag" wx:if="{{item.feelingName !== '未记录'}}">{{item.feelingName}}</text>
+        </view>
+        <text class="rc-note" wx:if="{{item.note}}">📝 {{item.note}}</text>
+      </view>
+    </view>
+
+    <view wx:else class="no-record">
+      <text class="no-icon">📝</text>
+      <text class="no-text">当天还没有记录哦</text>
+    </view>
+  </view>
+
+  <button class="log-btn" bindtap="goAddPoo">
+    <text class="btn-plus">＋</text>
+    <text>记录便便</text>
+  </button>
+
+  <view class="ad-card" wx:if="{{showAd}}">
+    <text class="ad-icon">🧘</text>
+    <view class="ad-body">
+      <text class="ad-t1">"油"虑清空 一身轻松</text>
+      <text class="ad-t2">随时随地 身心轻盈</text>
+    </view>
+    <text class="ad-close" bindtap="closeAd">×</text>
+  </view>
+
+  <!-- ========== 详情弹窗 ========== -->
+  <view class="detail-mask" wx:if="{{showDetail}}" bindtap="closeDetail" catchtouchmove="preventScroll">
+    <view class="detail-popup" catchtap="preventScroll">
+      <view class="detail-bar" style="background:{{detailRecord.colorHex}}"></view>
+      <text class="detail-close" catchtap="closeDetail">×</text>
+
+      <view class="detail-head">
+        <view class="detail-color-big" style="background:{{detailRecord.colorHex}}"></view>
+        <view class="detail-title-area">
+          <text class="detail-title">{{detailRecord.formName}}</text>
+          <text class="detail-sub">{{detailRecord.date}} {{detailRecord.time}}</text>
+        </view>
+      </view>
+
+      <view class="detail-body">
+        <view class="detail-row">
+          <text class="detail-label">🎨 颜色</text>
+          <view class="detail-val-wrap">
+            <view class="detail-mini-dot" style="background:{{detailRecord.colorHex}}"></view>
+            <text class="detail-val">{{detailRecord.colorName}}</text>
+          </view>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">💩 形态</text>
+          <view class="detail-val-wrap">
+            <text class="detail-num-badge">{{detailRecord.formNum}}</text>
+            <view class="detail-val-col">
+              <text class="detail-val">{{detailRecord.formName}}</text>
+              <text class="detail-desc" wx:if="{{detailRecord.formDesc}}">{{detailRecord.formDesc}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">👃 气味</text>
+          <text class="detail-val">{{detailRecord.smellName}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">😌 感受</text>
+          <text class="detail-val">{{detailRecord.feelingName}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">⏱ 时长</text>
+          <text class="detail-val">{{detailRecord.durationName}}</text>
+        </view>
+        <view class="detail-row" wx:if="{{detailRecord.note}}">
+          <text class="detail-label">📝 备注</text>
+          <text class="detail-val note-val">{{detailRecord.note}}</text>
+        </view>
+      </view>
+
+      <view class="detail-actions">
+        <view class="detail-btn detail-btn-del" catchtap="tapDelete">
+          <text>🗑 删除</text>
+        </view>
+        <view class="detail-btn detail-btn-close" catchtap="closeDetail">
+          <text>关闭</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 自定义确认弹窗 ========== -->
+  <view class="modal-mask" wx:if="{{showModal}}" catchtap="modalCancel" catchtouchmove="preventScroll">
+    <view class="modal-card" catchtap="preventScroll">
+      <text class="modal-emoji">{{modalEmoji}}</text>
+      <text class="modal-title">{{modalTitle}}</text>
+      <text class="modal-content">{{modalContent}}</text>
+      <view class="modal-btns">
+        <view class="modal-btn cancel" catchtap="modalCancel">再想想</view>
+        <view class="modal-btn confirm" catchtap="modalConfirm">删掉啦</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 自定义 Toast ========== -->
+  <view class="toast-wrap {{showToast ? 'show' : ''}} {{toastHiding ? 'hiding' : ''}}" wx:if="{{showToast}}">
+    <view class="toast-box">
+      <text class="toast-emoji">{{toastEmoji}}</text>
+      <text class="toast-text">{{toastText}}</text>
+    </view>
+  </view>
+</view>

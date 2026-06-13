@@ -1,0 +1,209 @@
+<scroll-view scroll-y class="page">
+
+<view class="hint-bar" wx:if="{{!hasInfo}}" bindtap="goProfile">
+  <view class="hint-left"><text class="hint-icon">📝</text><text class="hint-text">填写个人信息获得精准热量推荐</text></view>
+  <text class="hint-arrow">去填写 ›</text>
+</view>
+
+<view class="nutri-card" wx:if="{{hasInfo && personal}}">
+  <text class="nc-label">每日营养目标</text>
+  <view class="nc-main">
+    <view class="nc-cal-wrap"><text class="nc-cal-num">{{personal.targetCal}}</text><text class="nc-cal-unit">kcal / 天</text></view>
+    <view class="nc-badge"><text class="ncb-t">{{personal.goalLabel}} · {{personal.adjLabel}}</text><text class="ncb-v">{{personal.dailyAdj > 0 ? '+' : ''}}{{personal.dailyAdj}}kcal</text></view>
+  </view>
+  <view class="nc-bar"><view class="ncb-seg c" style="width:{{personal.cPct}}%"></view><view class="ncb-seg p" style="width:{{personal.pPct}}%"></view><view class="ncb-seg f" style="width:{{personal.fPct}}%"></view></view>
+  <view class="nc-macro"><view class="ncm"><text class="ncm-dot c"></text><text class="ncm-n">碳水</text><text class="ncm-v">{{personal.cPct}}% · {{personal.cG}}g</text></view><view class="ncm"><text class="ncm-dot p"></text><text class="ncm-n">蛋白质</text><text class="ncm-v">{{personal.pPct}}% · {{personal.pG}}g</text></view><view class="ncm"><text class="ncm-dot f"></text><text class="ncm-n">脂肪</text><text class="ncm-v">{{personal.fPct}}% · {{personal.fG}}g</text></view></view>
+  <view class="nc-foot"><text>BMR {{personal.bmr}}</text><text class="ncf-d">·</text><text>TDEE {{personal.tdee}}</text><text class="ncf-d" wx:if="{{personal.dailyEx>0}}">·</text><text wx:if="{{personal.dailyEx>0}}">运动 {{personal.dailyEx}}kcal/天</text></view>
+</view>
+<view class="nutri-card default" wx:if="{{!hasInfo}}">
+  <text class="nc-label">每日营养目标（默认）</text>
+  <view class="nc-main"><view class="nc-cal-wrap"><text class="nc-cal-num">1800</text><text class="nc-cal-unit">kcal / 天</text></view></view>
+  <text class="nc-hint">填写个人信息后将计算个性化热量</text>
+</view>
+
+<!-- ==================== 饮食计划 ==================== -->
+<view class="sec-hd"><text class="sec-t">饮食计划</text></view>
+<view class="active-card" wx:if="{{activeDietKey && dietWeek.length > 0}}">
+  <view class="ac-hd">
+    <text class="ac-icon">{{activeDietIcon}}</text>
+    <view class="ac-mid"><text class="ac-name">{{activeDietName}}</text><text class="ac-sub">{{dietWeek.length}}天循环</text></view>
+    <view class="ac-btn" catchtap="openDietModal"><text class="ac-btn-t">更换</text></view>
+  </view>
+  <view class="plan-day-info" wx:if="{{planDays > 0}}">
+    <text class="pdi-text">📅 今天是计划执行第 <text class="pdi-num">{{planDays}}</text> 天 · 循环第 {{todayIdx + 1}} 天</text>
+  </view>
+  <view class="bf-row">
+    <text class="bf-l">🍳 早餐</text>
+    <view class="bf-sw"><view class="bf-o {{eatBf?'on':''}}" catchtap="toggleBf" data-v="true">吃</view><view class="bf-o {{!eatBf?'on':''}}" catchtap="toggleBf" data-v="false">不吃</view></view>
+    <text class="bf-tip" wx:if="{{!eatBf}}">热量分配至午晚餐</text>
+  </view>
+  <scroll-view scroll-x class="day-tabs">
+    <view class="dt {{dietDayIdx===index?'on':''}} {{todayIdx===index?'is-today':''}}" wx:for="{{dietWeek}}" wx:key="day" catchtap="tapDietDay" data-idx="{{index}}">
+      <text class="dt-tag" wx:if="{{todayIdx===index}}">今天</text>
+      <text class="dt-n">{{item.day}}</text><text class="dt-l">{{item.dayName}}</text>
+    </view>
+  </scroll-view>
+  <view class="back-today" wx:if="{{todayIdx >= 0 && dietDayIdx !== todayIdx}}" catchtap="backToToday">
+    <text class="bt-icon">📅</text><text class="bt-t">回到今天的食谱</text>
+  </view>
+  <view class="day-ov">
+    <view class="do-hd"><text class="do-t">{{dietWeek[dietDayIdx].dayName}}</text><text class="do-c">{{dietWeek[dietDayIdx].totalCal}} kcal</text></view>
+    <view class="do-m"><text>碳{{dietWeek[dietDayIdx].cPct}}% · {{dietWeek[dietDayIdx].cG}}g</text><text>蛋{{dietWeek[dietDayIdx].pPct}}% · {{dietWeek[dietDayIdx].pG}}g</text><text>脂{{dietWeek[dietDayIdx].fPct}}% · {{dietWeek[dietDayIdx].fG}}g</text></view>
+  </view>
+  <view class="meal-cd {{dietMealExpanded===(dietDayIdx+'-'+index)?'expanded':''}}" wx:for="{{dietWeek[dietDayIdx].meals}}" wx:for-item="meal" wx:key="name">
+    <view class="mk-hd" catchtap="toggleMeal" data-dayidx="{{dietDayIdx}}" data-mealidx="{{index}}">
+      <view class="mk-left"><view class="mk-dot {{meal.name==='早餐'?'bf':meal.name==='午餐'?'lu':meal.name==='加餐'?'sk':'di'}}"></view><text class="mk-n">{{meal.name}}</text><text class="mk-count" wx:if="{{meal.foods.length > 0}}">{{meal.foods.length}}项</text></view>
+      <view class="mk-right"><text class="mk-c">{{meal.totalCal}} kcal</text><text class="mk-arrow {{dietMealExpanded===(dietDayIdx+'-'+index)?'up':''}}">›</text></view>
+    </view>
+    <view class="mk-body" wx:if="{{dietMealExpanded===(dietDayIdx+'-'+index) && meal.foods.length > 0}}">
+      <view class="food-card" wx:for="{{meal.foods}}" wx:for-item="f" wx:key="index">
+        <view class="fc-left"><text class="fc-name">{{f.name || '推荐食材'}}</text><text class="fc-portion">{{f.grams}}克</text></view>
+        <text class="fc-cal">{{f.cal}} kcal</text>
+      </view>
+      <view class="mk-total"><text class="mkt-t">合计</text><text class="mkt-c">{{meal.totalCal}} kcal</text></view>
+    </view>
+    <view class="mk-body" wx:if="{{dietMealExpanded===(dietDayIdx+'-'+index) && meal.foods.length === 0}}"><text class="mk-empty">暂无推荐食材</text></view>
+  </view>
+</view>
+<view class="empty-card" wx:if="{{!activeDietKey}}">
+  <text class="ec-icon">🍽️</text><text class="ec-t">还没有选择饮食计划</text>
+  <view class="ec-btn" catchtap="openDietModal">选择饮食计划</view>
+</view>
+
+<!-- ==================== 训练计划 ==================== -->
+<view class="sec-hd" style="margin-top:44rpx"><text class="sec-t">训练计划</text></view>
+<view class="active-card train-ac" wx:if="{{activeTrainKey && trainSchedule.length > 0}}">
+  <view class="ac-hd">
+    <text class="ac-icon">{{activeTrainIcon}}</text>
+    <view class="ac-mid"><text class="ac-name">{{activeTrainName}}</text><text class="ac-sub">每周 {{trainWeeklyHrs}} 小时 · 消耗 {{trainWeeklyCal}} kcal</text></view>
+    <view class="ac-btn tr-btn" catchtap="openTrainModal"><text class="ac-btn-t">更换</text></view>
+  </view>
+
+  <view class="sch-group" wx:for="{{trainSchedule}}" wx:for-item="s" wx:key="day">
+    <view class="sch-row {{s.t==='t'?'do':'rest'}}" catchtap="toggleTrainDay" data-key="{{s.day}}">
+      <view class="sch-left"><view class="sch-dot {{s.t==='t'?'active':''}}"></view><view class="sch-info"><text class="sch-day">{{s.day}}</text><text class="sch-name">{{s.name}}</text></view></view>
+      <view class="sch-right">
+        <text class="sch-dur" wx:if="{{s.dur}}">{{s.dur}} min</text>
+        <text class="sch-dur rest-t" wx:if="{{!s.dur}}">休息</text>
+        <text class="sch-ex-count" wx:if="{{s.ex && s.ex.length > 0}}">{{s.ex.length}}项</text>
+        <text class="sch-arrow {{trainDayExpanded===s.day?'up':''}}">›</text>
+      </view>
+    </view>
+    <view class="sch-ex" wx:if="{{trainDayExpanded===s.day && s.ex && s.ex.length > 0}}">
+      <text class="se-item" wx:for="{{s.ex}}" wx:for-item="ex" wx:key="*this">{{ex}}</text>
+    </view>
+  </view>
+</view>
+<view class="empty-card" wx:if="{{!activeTrainKey}}">
+  <text class="ec-icon">🏋️</text><text class="ec-t">还没有选择训练计划</text>
+  <view class="ec-btn tr-ec" catchtap="openTrainModal">选择训练计划</view>
+</view>
+
+<view style="height:320rpx"></view>
+</scroll-view>
+
+<!-- ==================== 饮食弹窗 ==================== -->
+<view class="mask {{showDietModal?'show':''}}" catchtap="closeDietModal">
+<view class="drawer" catchtap="">
+  <view class="dr-hd"><text class="dr-title">选择饮食计划</text><text class="dr-close" catchtap="closeDietModal">✕</text></view>
+  <scroll-view scroll-y class="dr-scroll">
+    <view class="dr-item {{dietModalExpanded===item.key?'open':''}}" wx:for="{{allDiets}}" wx:key="key">
+      <view class="di-hd" catchtap="tapDietInModal" data-key="{{item.key}}">
+        <text class="di-icon">{{item.icon}}</text>
+        <view class="di-mid">
+          <text class="di-name">{{item.name}}</text>
+          <view class="di-tags"><text class="dit" wx:if="{{item.period}}">{{item.period}}天</text><text class="dit" wx:if="{{item.target}}">减{{item.target}}</text><text class="dit" wx:if="{{item.users}}">{{item.users}}</text><text class="dit on" wx:if="{{activeDietKey===item.key}}">使用中</text></view>
+        </view>
+        <view class="di-expand"><text class="di-expand-t" wx:if="{{dietModalExpanded!==item.key}}">详情</text><text class="di-expand-arrow {{dietModalExpanded===item.key?'up':''}}">›</text></view>
+      </view>
+      <text class="di-desc">{{item.desc}}</text>
+
+      <view class="di-preview" wx:if="{{dietModalExpanded===item.key}}" catchtap="">
+        <view class="dp-hd"><text class="dp-hd-t">📋 每日食谱安排</text></view>
+        <scroll-view scroll-x class="dp-day-tabs">
+          <view class="dp-day {{dietModalDayIdx===index?'on':''}}" wx:for="{{item.week}}" wx:key="day" catchtap="tapModalDietDay" data-idx="{{index}}">
+            <text class="dpd-n">第{{item.day}}天</text><text class="dpd-l">{{item.dayName}}</text>
+          </view>
+        </scroll-view>
+        <view class="dp-ov">
+          <view class="dp-ov-hd"><text class="dp-ov-name">{{item.week[dietModalDayIdx].dayName}}</text><text class="dp-ov-cal">{{item.week[dietModalDayIdx].totalCal}} kcal</text></view>
+          <view class="dp-ov-bar"><view class="dpb-seg c" style="width:{{item.week[dietModalDayIdx].cPct}}%"></view><view class="dpb-seg p" style="width:{{item.week[dietModalDayIdx].pPct}}%"></view><view class="dpb-seg f" style="width:{{item.week[dietModalDayIdx].fPct}}%"></view></view>
+          <view class="dp-ov-macro"><text class="dp-ov-m"><text class="dp-ov-dot c"></text>碳{{item.week[dietModalDayIdx].cPct}}% · {{item.week[dietModalDayIdx].cG}}g</text><text class="dp-ov-m"><text class="dp-ov-dot p"></text>蛋{{item.week[dietModalDayIdx].pPct}}% · {{item.week[dietModalDayIdx].pG}}g</text><text class="dp-ov-m"><text class="dp-ov-dot f"></text>脂{{item.week[dietModalDayIdx].fPct}}% · {{item.week[dietModalDayIdx].fG}}g</text></view>
+        </view>
+        <view class="dp-meal {{dietModalMealExpanded===(dietModalDayIdx+'-'+mi)?'expanded':''}}" wx:for="{{item.week[dietModalDayIdx].meals}}" wx:for-item="ml" wx:for-index="mi" wx:key="name">
+          <view class="dp-mk-hd" catchtap="toggleModalMeal" data-dayidx="{{dietModalDayIdx}}" data-mealidx="{{mi}}">
+            <view class="dp-mk-left"><view class="dp-mk-dot {{ml.name==='早餐'?'bf':ml.name==='午餐'?'lu':ml.name==='加餐'?'sk':'di'}}"></view><text class="dp-mk-n">{{ml.name}}</text><text class="dp-mk-count">{{ml.foods.length}}项</text></view>
+            <view class="dp-mk-right"><text class="dp-mk-cal">{{ml.totalCal}} kcal</text><text class="dp-mk-arrow {{dietModalMealExpanded===(dietModalDayIdx+'-'+mi)?'up':''}}">›</text></view>
+          </view>
+          <view class="dp-mk-body" wx:if="{{dietModalMealExpanded===(dietModalDayIdx+'-'+mi)}}">
+            <block wx:if="{{ml.foods.length > 0}}">
+              <view class="dp-food" wx:for="{{ml.foods}}" wx:for-item="f" wx:key="index">
+                <view class="dpf-left"><text class="dpf-name">{{f.name || '推荐食材'}}</text><text class="dpf-portion">{{f.grams}}克</text></view>
+                <text class="dpf-cal">{{f.cal}} kcal</text>
+              </view>
+              <view class="dp-mk-total"><text class="dpmt-t">餐次合计</text><text class="dpmt-c">{{ml.totalCal}} kcal</text></view>
+            </block>
+            <text class="dp-mk-empty" wx:if="{{ml.foods.length === 0}}">暂无推荐食材</text>
+          </view>
+        </view>
+        <view class="dp-ref" wx:if="{{item.ref}}"><text class="dp-ref-t">📖 {{item.ref}}</text></view>
+      </view>
+
+      <view class="di-sel {{activeDietKey===item.key?'current':''}}" catchtap="selectDiet" data-key="{{item.key}}"><text>{{activeDietKey===item.key?'✓ 当前使用中':'设为我的计划'}}</text></view>
+    </view>
+    <view style="height:120rpx"></view>
+  </scroll-view>
+</view>
+</view>
+
+<!-- ==================== 训练弹窗 ==================== -->
+<view class="mask {{showTrainModal?'show':''}}" catchtap="closeTrainModal">
+<view class="drawer" catchtap="">
+  <view class="dr-hd"><text class="dr-title">选择训练计划</text><text class="dr-close" catchtap="closeTrainModal">✕</text></view>
+  <scroll-view scroll-y class="dr-scroll">
+    <view class="dr-item {{trainModalExpanded===item.key?'open':''}}" wx:for="{{allTrains}}" wx:key="key">
+      <view class="di-hd" catchtap="tapTrainInModal" data-key="{{item.key}}">
+        <text class="di-icon">{{item.icon}}</text>
+        <view class="di-mid">
+          <text class="di-name">{{item.name}}</text>
+          <view class="di-tags"><text class="dit">{{item.diff}}</text><text class="dit">{{item.weeklyHrs}}h/周</text><text class="dit">{{item.weeklyCal}}kcal/周</text><text class="dit on" wx:if="{{activeTrainKey===item.key}}">使用中</text></view>
+        </view>
+        <view class="di-expand"><text class="di-expand-t" wx:if="{{trainModalExpanded!==item.key}}">详情</text><text class="di-expand-arrow {{trainModalExpanded===item.key?'up':''}}">›</text></view>
+      </view>
+      <text class="di-desc">{{item.desc}}</text>
+
+      <!-- 展开后：完整排期 + 每天可展开查看动作 -->
+      <view class="di-schedule" wx:if="{{trainModalExpanded===item.key}}" catchtap="">
+        <view class="sch-group" wx:for="{{item.sch}}" wx:for-item="s" wx:key="day">
+          <!-- 当天行 -->
+          <view class="m-sch-row {{s.t==='t'?'do':'rest'}}" catchtap="toggleTrainModalDay" data-plankey="{{item.key}}" data-dayidx="{{index}}">
+            <view class="msr-left">
+              <view class="msr-dot {{s.t==='t'?'active':''}}"></view>
+              <view class="msr-info">
+                <text class="msr-day">{{s.day}}</text>
+                <text class="msr-name">{{s.name}}</text>
+              </view>
+            </view>
+            <view class="msr-right">
+              <text class="msr-dur" wx:if="{{s.dur}}">{{s.dur}}min</text>
+              <text class="msr-dur rest-label" wx:if="{{!s.dur}}">休息</text>
+              <text class="msr-ex-hint" wx:if="{{s.ex && s.ex.length > 0}}">{{s.ex.length}}项动作</text>
+              <text class="msr-arrow {{trainModalDayExpanded===(item.key+'-'+index)?'up':''}}">›</text>
+            </view>
+          </view>
+          <!-- 动作详情（紧跟在当天行下方） -->
+          <view class="m-sch-ex" wx:if="{{trainModalDayExpanded===(item.key+'-'+index) && s.ex && s.ex.length > 0}}">
+            <text class="mse-item" wx:for="{{s.ex}}" wx:for-item="ex" wx:key="*this">{{ex}}</text>
+          </view>
+          <view class="m-sch-ex empty" wx:if="{{trainModalDayExpanded===(item.key+'-'+index) && (!s.ex || s.ex.length === 0)}}">
+            <text class="mse-empty">休息日，无训练动作</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="di-sel tr-sel {{activeTrainKey===item.key?'current':''}}" catchtap="selectTrain" data-key="{{item.key}}"><text>{{activeTrainKey===item.key?'✓ 当前使用中':'设为我的训练计划'}}</text></view>
+    </view>
+    <view style="height:120rpx"></view>
+  </scroll-view>
+</view>
+</view>

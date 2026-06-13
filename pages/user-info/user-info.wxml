@@ -1,0 +1,231 @@
+<view class="page {{pageReady ? 'ready' : ''}}">
+
+<!-- 渐变头部 -->
+<view class="header">
+  <view class="header-orb orb-1"></view>
+  <view class="header-orb orb-2"></view>
+  <view class="header-orb orb-3"></view>
+  <view class="header-content">
+    <text class="h-title">个人资料</text>
+    <text class="h-sub">完善信息，获取你的专属方案</text>
+  </view>
+</view>
+
+<!-- 昵称 + 个性签名 -->
+<view class="card card-profile anim-1">
+  <view class="profile-row">
+    <view class="avatar-ring">
+      <view class="avatar-inner">
+        <text class="avatar-emoji">{{isFemale ? '👩' : '👨'}}</text>
+      </view>
+      <view class="avatar-pulse"></view>
+    </view>
+    <view class="profile-inputs">
+      <text class="ig-label">昵称</text>
+      <view class="input-wrap">
+        <input class="input" placeholder="输入你的昵称" placeholder-class="ph"
+               value="{{nickname}}" bindinput="onNickname" maxlength="12" />
+      </view>
+    </view>
+  </view>
+  <view class="sig-area">
+    <text class="sig-label">个性签名</text>
+    <view class="input-wrap sig-wrap">
+      <input class="input sig-input" placeholder="写一句话激励自己吧" placeholder-class="ph"
+             value="{{signature}}" bindinput="onSignature" maxlength="30" />
+    </view>
+  </view>
+</view>
+
+<!-- 性别（男生在左，女生在右） -->
+<view class="card anim-2">
+  <view class="card-header">
+    <view class="card-icon-box pink-bg">
+      <text class="card-icon-text">👤</text>
+    </view>
+    <text class="card-label">性别</text>
+  </view>
+  <view class="gender-row">
+    <view class="gender-item {{gender==='male' ? 'active male-active' : ''}}"
+          data-g="male" bindtap="selectGender">
+      <view class="gi-circle">
+        <text class="gi-emoji">👨</text>
+      </view>
+      <text class="gi-text">男生</text>
+    </view>
+    <view class="gender-item {{gender==='female' ? 'active female-active' : ''}}"
+          data-g="female" bindtap="selectGender">
+      <view class="gi-circle">
+        <text class="gi-emoji">👩</text>
+      </view>
+      <text class="gi-text">女生</text>
+    </view>
+  </view>
+</view>
+
+<!-- 身体数据 2×2 -->
+<view class="card anim-3">
+  <view class="card-header">
+    <view class="card-icon-box blue-bg">
+      <text class="card-icon-text">📐</text>
+    </view>
+    <text class="card-label">身体数据</text>
+  </view>
+  <view class="body-grid">
+    <view class="bg-item">
+      <view class="bg-top">
+        <text class="bg-icon">🎂</text>
+        <text class="bg-name">年龄</text>
+      </view>
+      <view class="bg-bottom">
+        <input class="bg-input" type="number" placeholder="--" value="{{age}}" bindinput="onAge" />
+        <text class="bg-unit">岁</text>
+      </view>
+    </view>
+    <view class="bg-item">
+      <view class="bg-top">
+        <text class="bg-icon">📏</text>
+        <text class="bg-name">身高</text>
+      </view>
+      <view class="bg-bottom">
+        <input class="bg-input" type="digit" placeholder="--" value="{{height}}" bindinput="onHeight" />
+        <text class="bg-unit">cm</text>
+      </view>
+    </view>
+    <view class="bg-item">
+      <view class="bg-top">
+        <text class="bg-icon">⚖️</text>
+        <text class="bg-name">当前体重</text>
+      </view>
+      <view class="bg-bottom">
+        <input class="bg-input" type="digit" placeholder="--" value="{{weight}}" bindinput="onWeight" />
+        <text class="bg-unit">kg</text>
+      </view>
+    </view>
+    <view class="bg-item">
+      <view class="bg-top">
+        <text class="bg-icon">🎯</text>
+        <text class="bg-name">目标体重</text>
+      </view>
+      <view class="bg-bottom">
+        <input class="bg-input" type="digit" placeholder="--" value="{{targetWeight}}" bindinput="onTargetWeight" />
+        <text class="bg-unit">kg</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 活动水平 -->
+<view class="card anim-4">
+  <view class="card-header">
+    <view class="card-icon-box green-bg">
+      <text class="card-icon-text">⚡</text>
+    </view>
+    <text class="card-label">活动水平</text>
+  </view>
+  <view class="act-list">
+    <view class="act-item {{activity === item.key ? 'act-active' : ''}}"
+          wx:for="{{actList}}" wx:key="key"
+          data-i="{{item.key}}" bindtap="selectAct">
+      <view class="al-left">
+        <view class="al-icon-wrap {{activity === item.key ? 'al-icon-on' : ''}}">
+          <text class="al-icon">{{item.icon}}</text>
+        </view>
+        <view class="al-info">
+          <text class="al-label">{{item.label}}</text>
+          <text class="al-desc">{{item.desc}}</text>
+        </view>
+      </view>
+      <view class="al-radio {{activity === item.key ? 'al-radio-on' : ''}}">
+        <view class="al-radio-dot" wx:if="{{activity === item.key}}"></view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 健身目标 2×2 -->
+<view class="card anim-5">
+  <view class="card-header">
+    <view class="card-icon-box orange-bg">
+      <text class="card-icon-text">🏆</text>
+    </view>
+    <text class="card-label">健身目标</text>
+  </view>
+  <view class="goal-grid">
+    <view class="goal-item {{goal === item.key ? 'goal-active' : ''}}"
+          wx:for="{{goalList}}" wx:key="key"
+          data-i="{{item.key}}" bindtap="selectGoal"
+          style="{{goal === item.key ? 'border-color:' + item.color + ';background:' + item.bg : ''}}">
+      <view class="gl-icon-wrap" style="{{goal === item.key ? 'background:' + item.bg : ''}}">
+        <text class="gl-emoji">{{item.icon}}</text>
+      </view>
+      <text class="gl-label" style="{{goal === item.key ? 'color:' + item.color : ''}}">{{item.label}}</text>
+      <view class="gl-check" wx:if="{{goal === item.key}}" style="background:{{item.color}}">
+        <text class="gl-check-icon">✓</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="sync-banner" wx:if="{{hasGoalPlan}}" bindtap="goGoalManagement">
+    <view class="sb-pulse"></view>
+    <view class="sb-left">
+      <text class="sb-emoji">{{goalPlanEmoji}}</text>
+      <view class="sb-info">
+        <text class="sb-title">目标管理已开启</text>
+        <text class="sb-desc">当前计划：{{goalPlanLabel}} · 点击查看详情</text>
+      </view>
+    </view>
+    <text class="sb-arrow">›</text>
+  </view>
+</view>
+
+<!-- 热量预览 -->
+<view class="preview-card anim-6" wx:if="{{showPreview}}">
+  <view class="pv-header">
+    <view class="pv-title-row">
+      <text class="pv-title-icon">📊</text>
+      <text class="pv-title">热量分析</text>
+    </view>
+    <text class="pv-badge">实时计算</text>
+  </view>
+  <view class="pv-grid">
+    <view class="pv-item">
+      <view class="pv-circle c1">
+        <text class="pv-val">{{pvBMR}}</text>
+      </view>
+      <text class="pv-name">基础代谢</text>
+      <text class="pv-unit">BMR</text>
+    </view>
+    <view class="pv-connector">
+      <view class="pv-line"></view>
+      <text class="pv-arrow-r">›</text>
+    </view>
+    <view class="pv-item">
+      <view class="pv-circle c2">
+        <text class="pv-val">{{pvTDEE}}</text>
+      </view>
+      <text class="pv-name">每日消耗</text>
+      <text class="pv-unit">TDEE</text>
+    </view>
+    <view class="pv-connector">
+      <view class="pv-line"></view>
+      <text class="pv-arrow-r">›</text>
+    </view>
+    <view class="pv-item">
+      <view class="pv-circle c3">
+        <text class="pv-val">{{pvTarget}}</text>
+      </view>
+      <text class="pv-name">目标摄入</text>
+      <text class="pv-unit">kcal / 天</text>
+    </view>
+  </view>
+</view>
+
+<!-- 保存按钮 -->
+<view class="save-btn anim-7" bindtap="saveInfo">
+  <view class="save-shine"></view>
+  <text class="save-text">保存资料</text>
+</view>
+
+<view class="bottom-space"></view>
+</view>

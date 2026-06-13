@@ -1,0 +1,9 @@
+# 忽略安装包、压缩包
+*.exe
+*.zip
+*.7z
+*.rar
+
+# 忽略依赖与缓存
+node_modules/
+miniprogram_npm/

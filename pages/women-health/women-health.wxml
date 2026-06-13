@@ -1,0 +1,376 @@
+<scroll-view scroll-y class="wh-page">
+
+<!-- ===== 顶部 ===== -->
+<view class="wh-header">
+  <view class="float-decor fd-1">🌸</view>
+  <view class="float-decor fd-2">💕</view>
+  <view class="float-decor fd-3">✨</view>
+  <view class="float-decor fd-4">🌷</view>
+  <view class="hdr-bar">
+    <text class="back" bindtap="goBack">‹</text>
+    <view class="bell" bindtap="toggleRemind"><text>{{isRemind?'🔔':'🔕'}}</text></view>
+  </view>
+
+  <block wx:if="{{hasData}}">
+    <view class="ring-wrap">
+      <!-- 经期进行中 -->
+      <block wx:if="{{isInPeriod}}">
+        <view class="ring period-ring" style="border-color:{{phaseColor}};background:conic-gradient({{phaseColor}} {{periodProgress}}%,rgba(255,255,255,.3) 0)">
+          <view class="ring-in">
+            <text class="ring-num" style="color:{{phaseColor}}">{{periodDayNum}}</text>
+            <text class="ring-lbl">经期第{{periodDayNum}}天</text>
+          </view>
+        </view>
+      </block>
+      <!-- 经期刚结束 -->
+      <block wx:elif="{{periodEnded}}">
+        <view class="ring ended-ring">
+          <view class="ring-in ended-ring-in">
+            <text class="ring-num ended-num">{{lastPeriodDays}}</text>
+            <text class="ring-lbl ended-lbl">共持续{{lastPeriodDays}}天</text>
+          </view>
+        </view>
+      </block>
+      <!-- 正常周期 -->
+      <block wx:else>
+        <view class="ring" style="border-color:{{phaseColor}};background:conic-gradient({{phaseColor}} {{cycleProgress}}%,rgba(255,255,255,.3) 0)">
+          <view class="ring-in">
+            <text class="ring-num" style="color:{{phaseColor}}">{{cycleDay}}</text>
+            <text class="ring-lbl">周期第{{cycleDay}}天</text>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 徽章 -->
+    <view class="badge" style="background:{{phaseColor}}22;color:{{phaseColor}}">{{phaseEmoji}} {{currentPhase}}</view>
+
+    <!-- 经期中 -->
+    <block wx:if="{{isInPeriod}}">
+      <view class="cd-bar">
+        <view class="cd">
+          <text class="cd-n">{{periodEstTotal}}</text>
+          <text class="cd-l">预计持续天数</text>
+        </view>
+        <view class="cd-s"></view>
+        <view class="cd">
+          <text class="cd-n" wx:if="{{periodOvertime > 0}}">{{periodOvertime}}</text>
+          <text class="cd-n" wx:else>{{periodEstTotal - periodDayNum > 0 ? periodEstTotal - periodDayNum : 0}}</text>
+          <text class="cd-l" wx:if="{{periodOvertime > 0}}">天超出平均</text>
+          <text class="cd-l" wx:else>天后预计结束</text>
+        </view>
+      </view>
+      <view class="period-hint {{periodOvertime > 0 ? 'warn' : ''}}">{{periodMsg}}</view>
+    </block>
+
+    <!-- 经期刚结束 -->
+    <block wx:elif="{{periodEnded}}">
+      <view class="cd-bar">
+        <view class="cd">
+          <text class="cd-n">{{daysUntilPeriod}}</text>
+          <text class="cd-l">天后来月经</text>
+        </view>
+        <view class="cd-s"></view>
+        <view class="cd">
+          <text class="cd-n">{{ovulationIn}}</text>
+          <text class="cd-l">天后排卵</text>
+        </view>
+      </view>
+      <view class="ended-tip">经期结束后2~3天内可能有少量出血，属正常现象，注意休息~</view>
+    </block>
+
+    <!-- 正常周期倒计时 -->
+    <block wx:else>
+      <view class="cd-bar">
+        <view class="cd">
+          <text class="cd-n">{{daysUntilPeriod}}</text>
+          <text class="cd-l">天后来月经</text>
+        </view>
+        <view class="cd-s"></view>
+        <view class="cd">
+          <text class="cd-n">{{ovulationIn}}</text>
+          <text class="cd-l">天后排卵</text>
+        </view>
+      </view>
+    </block>
+  </block>
+
+  <block wx:else>
+    <view class="empty-hdr">
+      <text class="eh-emoji">🌸</text>
+      <text class="eh-title">开始追踪周期</text>
+      <text class="eh-hint">点击日历中的日期开始标记</text>
+    </view>
+  </block>
+</view>
+
+<!-- ===== 日历 ===== -->
+<view class="card cal-card">
+  <view class="cal-top"><text class="card-ttl">📅 经期日历</text><text class="cal-tip" wx:if="{{!hasData}}">点击日期开始标记</text></view>
+  <view class="cal-nav"><text class="nav-a" bindtap="prevMonth">‹</text><text class="nav-m">{{currentMonth}}</text><text class="nav-a" bindtap="nextMonth">›</text></view>
+  <view class="wk"><text>一</text><text>二</text><text>三</text><text>四</text><text>五</text><text>六</text><text>日</text></view>
+  <view class="dg">
+    <view wx:for="{{calendarDays}}" wx:key="index" class="d {{item.type}}" data-day="{{item.day}}" bindtap="onDayTap">
+      <text wx:if="{{item.day}}">{{item.day}}</text>
+    </view>
+  </view>
+  <view class="leg">
+    <view class="lg"><view class="ld lr"></view><text>已记录</text></view>
+    <view class="lg"><view class="ld la"></view><text>进行中</text></view>
+    <view class="lg"><view class="ld lp"></view><text>预测经期</text></view>
+    <view class="lg"><view class="ld lo"></view><text>排卵期</text></view>
+    <view class="lg"><view class="ld lf"></view><text>卵泡期</text></view>
+    <view class="lg"><view class="ld ll"></view><text>黄体期</text></view>
+  </view>
+  <view class="sel-bar">
+    <view class="sel-left">
+      <view class="sel-dot" style="background:{{selectedPhaseColor}}"></view>
+      <text class="sel-date">{{selectedDateDisp}}</text>
+      <text class="sel-phase" style="color:{{selectedPhaseColor}}">{{selectedPhase}}</text>
+    </view>
+    <view class="sel-btn" bindtap="openPeriodMark">🌸 标记经期</view>
+  </view>
+</view>
+
+<!-- ===== 经期日养 ===== -->
+<view class="card daily-card" wx:if="{{hasActivePeriod && dailyRecipe}}">
+  <view class="daily-header">
+    <text class="card-ttl">🌸 经期日养</text>
+    <view class="daily-day-badge">第{{periodDayNum}}天</view>
+  </view>
+  <view class="daily-section">
+    <text class="daily-icon">{{dailyRecipe.emoji}}</text>
+    <view class="daily-info">
+      <text class="daily-title">{{dailyRecipe.title}}</text>
+      <text class="daily-desc">{{dailyRecipe.desc}}</text>
+      <view class="daily-meta-wrap"><text class="daily-meta">{{dailyRecipe.tip}}</text></view>
+    </view>
+  </view>
+  <view class="daily-divider"><view class="divider-line"></view><text class="divider-text">身心放松</text><view class="divider-line"></view></view>
+  <view class="daily-section">
+    <text class="daily-icon">{{dailyRelax.emoji}}</text>
+    <view class="daily-info">
+      <text class="daily-title">{{dailyRelax.title}}</text>
+      <text class="daily-desc">{{dailyRelax.desc}}</text>
+      <view class="daily-meta-wrap"><text class="daily-meta">⏱ 建议时长：{{dailyRelax.duration}}</text></view>
+    </view>
+  </view>
+</view>
+
+<!-- ===== 心情记录 ===== -->
+<view class="card">
+  <view class="sec-head"><text class="card-ttl">💕 心情记录</text><view class="sec-add" bindtap="openMoodModal">+ 记录</view></view>
+  <block wx:if="{{moodsForDate.length > 0}}">
+    <view class="log-list">
+      <view class="log-item" wx:for="{{moodsForDate}}" wx:key="index">
+        <text class="log-emoji">{{item.emoji}}</text>
+        <view class="log-body"><text class="log-name">{{item.text}}</text><text class="log-time">{{item.time}}</text></view>
+        <text class="log-del" data-idx="{{index}}" bindtap="reqDelMood">×</text>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="empty-sec"><text class="empty-emoji-sm">😊</text><text class="empty-text-sm">还没有记录，点击右上角添加</text></view>
+</view>
+
+<!-- ===== 症状记录 ===== -->
+<view class="card">
+  <view class="sec-head"><text class="card-ttl">💊 症状记录</text><view class="sec-add" bindtap="openSymModal">+ 记录</view></view>
+  <block wx:if="{{symsForDate.length > 0}}">
+    <view class="log-list">
+      <view class="log-item" wx:for="{{symsForDate}}" wx:key="index">
+        <view class="log-sym-icon">💊</view>
+        <view class="log-body"><text class="log-name">{{item.text}}</text><text class="log-time">{{item.time}}</text></view>
+        <text class="log-del" data-idx="{{index}}" bindtap="reqDelSym">×</text>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="empty-sec"><text class="empty-emoji-sm">💊</text><text class="empty-text-sm">还没有记录，点击右上角添加</text></view>
+</view>
+
+<!-- ===== 阶段总览 ===== -->
+<view class="card" wx:if="{{hasData}}" style="border-left:8rpx solid {{phaseColor}}">
+  <text class="si">{{phaseEmoji}}</text>
+  <view class="sw"><text class="sp" style="color:{{phaseColor}}">{{currentPhase}}</text><text class="st">{{phaseSummary}}</text></view>
+</view>
+
+<!-- ===== 建议 ===== -->
+<view class="card tips-card" wx:if="{{hasData && currentTips.length > 0}}">
+  <text class="card-ttl">💡 健康建议</text>
+  <view class="tabs">
+    <view class="tab {{tipTab === 0 ? 'act' : ''}}" style="{{tipTab === 0 ? 'background:' + phaseColor + '22;color:' + phaseColor : ''}}" bindtap="switchTab" data-tab="0">🥗 饮食</view>
+    <view class="tab {{tipTab === 1 ? 'act' : ''}}" style="{{tipTab === 1 ? 'background:' + phaseColor + '22;color:' + phaseColor : ''}}" bindtap="switchTab" data-tab="1">🏃 运动</view>
+    <view class="tab {{tipTab === 2 ? 'act' : ''}}" style="{{tipTab === 2 ? 'background:' + phaseColor + '22;color:' + phaseColor : ''}}" bindtap="switchTab" data-tab="2">😴 休息</view>
+  </view>
+  <view class="tl"><view class="ti" wx:for="{{currentTips}}" wx:key="index"><view class="td" style="background:{{phaseColor}}"></view><text class="tt">{{item}}</text></view></view>
+</view>
+
+<!-- ===== 历史 ===== -->
+<view class="card">
+  <text class="card-ttl">📋 经期历史</text>
+  <block wx:if="{{periodLogs.length > 0}}">
+    <view class="hi" wx:for="{{periodLogs}}" wx:key="id" data-start="{{item.startDate}}" bindtap="onHistTap">
+      <view class="hd" style="background:{{item.endDate ? '#E8356B' : '#FF9F43'}}"></view>
+      <view class="hn"><text class="hm">{{item.startYMD}}</text><text class="hx">{{item.endDate ? (item.start + ' - ' + item.end + ' · ' + item.days + '天') : '进行中'}}</text></view>
+      <view class="ht" style="background:{{item.endDate ? '#E8356B22' : '#FF9F4322'}};color:{{item.endDate ? '#E8356B' : '#FF9F43'}}">{{item.status}}</view>
+    </view>
+  </block>
+  <view wx:else class="emp"><text class="emp-e">📝</text><text class="emp-t">还没有记录，点击日历日期开始吧</text></view>
+</view>
+
+<view style="height:200rpx"></view>
+
+<!-- ===== 弹窗们 ===== -->
+<view class="mm {{showMoodModal ? 'show' : ''}}" bindtap="closeMoodModal"></view>
+<view class="popup {{showMoodModal ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <view class="p-h"></view>
+  <text class="p-title">今天心情怎么样？</text>
+  <text class="p-date">{{selectedDateDisp}}</text>
+  <view class="m-grid">
+    <view class="m-item {{selectedMood && selectedMood.emoji === item.emoji ? 'sel' : ''}}" wx:for="{{moodList}}" wx:key="index" data-index="{{index}}" bindtap="selectMood">
+      <text class="m-emoji">{{item.emoji}}</text><text class="m-text">{{item.text}}</text>
+    </view>
+  </view>
+  <button class="p-btn" bindtap="confirmAddMood">添加心情 💕</button>
+</view>
+
+<view class="mm {{showSymModal ? 'show' : ''}}" bindtap="closeSymModal"></view>
+<view class="popup {{showSymModal ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <view class="p-h"></view>
+  <text class="p-title">今天有什么症状？</text>
+  <text class="p-date">{{selectedDateDisp}}</text>
+  <view class="s-grid">
+    <view class="s-item {{symSelected[index] ? 'sel' : ''}}" wx:for="{{symList}}" wx:key="index" data-index="{{index}}" bindtap="toggleSymSelect"><text>{{item}}</text></view>
+  </view>
+  <button class="p-btn" bindtap="confirmAddSym">记录症状 💊</button>
+</view>
+
+<view class="km {{showMoodConfirm ? 'show' : ''}}"></view>
+<view class="kbox {{showMoodConfirm ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <text class="k-emoji">{{selectedMood ? selectedMood.emoji : '💕'}}</text>
+  <text class="k-title">记录{{selectedMood ? selectedMood.text : ''}}心情？</text>
+  <text class="k-sub">记录每一天的小情绪，照顾好自己哦~</text>
+  <view class="k-btns"><button class="k-cancel" bindtap="cancelMoodConfirm">再想想</button><button class="k-ok" bindtap="doAddMood">确认记录</button></view>
+</view>
+
+<view class="km {{showSymConfirm ? 'show' : ''}}"></view>
+<view class="kbox {{showSymConfirm ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <text class="k-emoji">💊</text>
+  <text class="k-title">记录这些症状？</text>
+  <text class="k-sub">身体的小信号也要认真对待哦~</text>
+  <view class="k-btns"><button class="k-cancel" bindtap="cancelSymConfirm">再想想</button><button class="k-ok" bindtap="doAddSym">确认记录</button></view>
+</view>
+
+<view class="km {{showMoodDel ? 'show' : ''}}"></view>
+<view class="kbox {{showMoodDel ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <text class="k-emoji">🥺</text>
+  <text class="k-title">要删除这条心情吗？</text>
+  <text class="k-sub">删掉后就看不到啦~</text>
+  <view class="k-btns"><button class="k-cancel" bindtap="cancelMoodDel">留着吧</button><button class="k-ok" bindtap="confirmDelMood">确定删除</button></view>
+</view>
+
+<view class="km {{showSymDel ? 'show' : ''}}"></view>
+<view class="kbox {{showSymDel ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <text class="k-emoji">🥺</text>
+  <text class="k-title">要删除这条症状吗？</text>
+  <text class="k-sub">删掉后就看不到啦~</text>
+  <view class="k-btns"><button class="k-cancel" bindtap="cancelSymDel">留着吧</button><button class="k-ok" bindtap="confirmDelSym">确定删除</button></view>
+</view>
+
+<!-- ===== 经期操作栏 ===== -->
+<view class="bm {{showPeriodBar ? 'show' : ''}}" bindtap="closePeriodBar"></view>
+<view class="bar {{showPeriodBar ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <view class="bar-h"></view>
+  <block wx:if="{{periodState === 'start'}}">
+    <view class="bar-row"><view class="bar-dot" style="background:{{periodPhaseColor}}"></view><text class="bar-date">{{periodDisplay}}</text><text class="bar-ph">{{periodPhase}}</text></view>
+    <text class="bar-hint">将标记为经期第一天</text>
+    <button class="bar-btn pink" bindtap="markStart">🌸 标记经期开始</button>
+  </block>
+  <block wx:if="{{periodState === 'end'}}">
+    <view class="bar-row"><view class="bar-dot" style="background:#E8356B"></view><text class="bar-date">{{periodDisplay}}</text><text class="bar-ph">月经期</text></view>
+    <text class="bar-info">{{periodInfo}}</text>
+    <text class="bar-hint">将标记为经期结束，共 {{periodDaysCount}} 天</text>
+    <button class="bar-btn pink" bindtap="markEnd">✅ 标记经期结束</button>
+    <text class="bar-cancel" bindtap="cancelActivePeriod">取消本次标记</text>
+  </block>
+</view>
+
+<!-- ===== 经期详情 ===== -->
+<view class="dm {{showDetail ? 'show' : ''}}" bindtap="closeDetail"></view>
+<view class="dv {{showDetail ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <view class="dv-h"></view>
+  <block wx:if="{{detailRec}}">
+    <view class="dv-title-row">
+      <text class="dv-emoji">🌸</text>
+      <text class="dv-title">{{detailRec.month}}月经期</text>
+      <view class="dv-status" style="background:{{detailRec.endDate ? '#3BA55D22' : '#FF9F4322'}};color:{{detailRec.endDate ? '#3BA55D' : '#FF9F43'}}">{{detailRec.status}}</view>
+    </view>
+    <view class="dv-section">
+      <view class="dv-row"><text class="dv-lbl">开始日期</text><text class="dv-val">{{detailRec.startYMD}}</text></view>
+      <view class="dv-row" wx:if="{{detailRec.endDate}}"><text class="dv-lbl">结束日期</text><text class="dv-val">{{detailRec.endYMD}}</text></view>
+      <view class="dv-row" wx:if="{{!detailRec.endDate}}"><text class="dv-lbl">当前天数</text><text class="dv-val">第 {{detailActiveDays}} 天（进行中）</text></view>
+      <view class="dv-row"><text class="dv-lbl">持续天数</text><text class="dv-val dv-days-highlight">{{detailRec.endDate ? detailRec.days : detailActiveDays}} 天</text></view>
+    </view>
+    <view class="dv-section" wx:if="{{detailDays.length > 0}}">
+      <text class="dv-lbl" style="margin-bottom:20rpx;display:block;font-weight:800;color:#2D2B41">每日记录</text>
+      <view class="timeline">
+        <view class="tl-item" wx:for="{{detailDays}}" wx:key="date">
+          <view class="tl-left"><view class="tl-dot {{item.hasSyms || item.hasMoods ? 'active' : ''}}"></view><view class="tl-line" wx:if="{{index < detailDays.length - 1}}"></view></view>
+          <view class="tl-right">
+            <view class="tl-head"><text class="tl-day">第{{item.dayNum}}天</text><text class="tl-date">{{item.display}}</text></view>
+            <view class="tl-moods" wx:if="{{item.hasMoods}}"><text class="tl-mood" wx:for="{{item.moods}}" wx:for-item="mo" wx:key="time">{{mo.emoji}} {{mo.text}} {{mo.time}}</text></view>
+            <view class="tl-syms" wx:if="{{item.hasSyms}}"><text class="tl-sym" wx:for="{{item.symptoms}}" wx:for-item="sym" wx:key="index">{{sym.text || sym}}</text></view>
+            <text class="tl-no" wx:if="{{!item.hasSyms && !item.hasMoods}}">未记录</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <button class="dv-del" data-id="{{detailRec.id}}" data-active="{{detailRec.endDate ? '0' : '1'}}" bindtap="reqDel">🗑️ {{detailRec.endDate ? '删除这条记录' : '取消本次标记'}}</button>
+  </block>
+</view>
+
+<view class="km {{showDel ? 'show' : ''}}"></view>
+<view class="kbox {{showDel ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <text class="k-emoji">🥺</text>
+  <text class="k-title">确定要{{delActive ? '取消标记' : '删除这条记录'}}吗？</text>
+  <text class="k-sub">删除后对应的预测结果也会同步消失哦~</text>
+  <view class="k-btns"><button class="k-cancel" bindtap="cancelDel">再想想</button><button class="k-ok" bindtap="confirmDel">确定{{delActive ? '取消' : '删除'}}</button></view>
+</view>
+
+<!-- ===== 经期结束总结 ===== -->
+<view class="km {{showEndSummary ? 'show' : ''}}"></view>
+<view class="endbox {{showEndSummary ? 'show' : ''}}" catchtouchmove="preventTouch">
+  <view class="end-h"></view>
+  <text class="end-emoji">🌸</text>
+  <text class="end-title">经期已结束</text>
+  <view class="end-days-wrap">
+    <text class="end-days-num">{{endDays}}</text>
+    <text class="end-days-unit">天</text>
+  </view>
+  <text class="end-days-label">本次经期持续</text>
+  <view class="end-card">
+    <view class="end-row"><text class="end-row-icon">📅</text><text class="end-row-label">开始日期</text><text class="end-row-value">{{endStart}}</text></view>
+    <view class="end-row"><text class="end-row-icon">📅</text><text class="end-row-label">结束日期</text><text class="end-row-value">{{endEnd}}</text></view>
+    <view class="end-row"><text class="end-row-icon">📊</text><text class="end-row-label">您的平均时长</text><text class="end-row-value">{{endAvg}} 天</text></view>
+  </view>
+  <view class="end-advice-card end-normal" wx:if="{{endStatus === 'normal'}}">
+    <text class="end-advice-icon">✓</text>
+    <text class="end-advice-text">{{endAdvice}}</text>
+  </view>
+  <view class="end-advice-card end-short" wx:if="{{endStatus === 'short'}}">
+    <text class="end-advice-icon">⚠️</text>
+    <text class="end-advice-text">{{endAdvice}}</text>
+  </view>
+  <view class="end-advice-card end-long" wx:if="{{endStatus === 'long'}}">
+    <text class="end-advice-icon">⚠️</text>
+    <text class="end-advice-text">{{endAdvice}}</text>
+  </view>
+  <view class="end-tips-card">
+    <text class="end-tips-title">💡 温馨提示</text>
+    <text class="end-tips-text">经期结束后2~3天内可能会有少量褐色或淡粉色分泌物，这属于正常现象，通常不需要特殊处理。</text>
+    <text class="end-tips-text" wx:if="{{endStatus !== 'long'}}">如果出现异常出血、持续腹痛或身体明显不适，建议及时就医。</text>
+    <text class="end-tips-text end-tips-em" wx:if="{{endStatus === 'long'}}">这次经期偏长，请多留意身体变化。如果伴有腹痛加重、出血量突然增多等情况，建议尽早就医检查。</text>
+  </view>
+  <button class="end-btn" bindtap="closeEndSummary">好的，知道了</button>
+</view>
+
+</scroll-view>

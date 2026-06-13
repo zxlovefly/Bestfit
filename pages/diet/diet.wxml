@@ -1,0 +1,202 @@
+<view class="page">
+  <!-- 日期导航 -->
+  <view class="date-bar">
+    <view class="da-btn" bindtap="onPrevDay" hover-class="da-h"><text>‹</text></view>
+    <view class="da-center" bindtap="openCalendar">
+      <text class="da-date">{{monthDay}}</text><text class="da-week">{{weekDay}}</text><text class="da-cal-icon">📅</text>
+    </view>
+    <view class="da-btn {{isToday?'da-dis':''}}" bindtap="onNextDay" hover-class="da-h"><text>›</text></view>
+  </view>
+  <view wx:if="{{!isToday}}" class="back-today" bindtap="onGoToday" hover-class="back-today-h">
+    <text class="bt-dot"></text><text class="bt-text">回到今天</text>
+  </view>
+
+  <scroll-view scroll-y class="body" enhanced="{{false}}" show-scrollbar="{{false}}">
+    <!-- 进度卡 -->
+    <view wx:if="{{targets}}" class="prog-card">
+      <view class="pc-accent"></view>
+      <view class="pc-top-row">
+        <view class="pc-cal-area">
+          <text class="pc-label">今日摄入</text>
+          <view class="pc-num-row"><text class="pc-num">{{intakeCal}}</text><text class="pc-of"> / {{targets.cal}} 千卡</text></view>
+        </view>
+        <view class="pc-pct-ring"><text class="pc-pct-val">{{calPct}}%</text></view>
+      </view>
+      <view class="pc-cal-bar"><view class="pc-cal-track"><view class="pc-cal-fill" style="width:{{calPct>100?100:calPct}}%"></view></view></view>
+      <view wx:if="{{targets.planDay>0}}" class="pc-plan-tag"><text>{{targets.dayName}} · 计划第{{targets.planDay}}天</text></view>
+      <view class="pc-macros">
+        <view class="pcm-row"><text class="pcm-icon">🍚</text><text class="pcm-name">碳水</text><view class="pcm-bar-track"><view class="pcm-bar-fill pcm-c" style="width:{{cPct>100?100:cPct}}%"></view></view><text class="pcm-val pcm-cv">{{intakeC}}/{{targets.carbs}}g</text></view>
+        <view class="pcm-row"><text class="pcm-icon">🥩</text><text class="pcm-name">蛋白质</text><view class="pcm-bar-track"><view class="pcm-bar-fill pcm-p" style="width:{{pPct>100?100:pPct}}%"></view></view><text class="pcm-val pcm-pv">{{intakeP}}/{{targets.protein}}g</text></view>
+        <view class="pcm-row"><text class="pcm-icon">🫒</text><text class="pcm-name">脂肪</text><view class="pcm-bar-track"><view class="pcm-bar-fill pcm-f" style="width:{{fPct>100?100:fPct}}%"></view></view><text class="pcm-val pcm-fv">{{intakeF}}/{{targets.fat}}g</text></view>
+      </view>
+    </view>
+
+    <view wx:for="{{messages}}" wx:key="text" class="msg-bubble {{item.type}}"><text>{{item.text}}</text></view>
+
+    <view class="big-dashed">
+      <view wx:if="{{!hasAnyRecord}}" class="big-empty">
+        <text class="big-empty-icon">🍽️</text>
+        <text class="big-empty-title">还没有记录哦</text>
+        <text class="big-empty-sub">点击下方开始记录</text>
+      </view>
+      <block wx:else>
+        <view wx:for="{{mealSections}}" wx:key="key" class="meal-block">
+          <view class="mb-head">
+            <view class="mb-emoji-ring"><text class="mb-emoji">{{item.emoji}}</text></view>
+            <view class="mb-info">
+              <text class="mb-name">{{item.name}}</text>
+              <view class="mb-cal-row">
+                <text class="mb-act {{item.actColor==='over'?'mb-act-over':item.actColor==='good'?'mb-act-good':''}}">{{item.totalCal}}</text>
+                <text class="mb-sep">/</text>
+                <text class="mb-tgt">{{item.recommendCal}}</text>
+                <text class="mb-unit">千卡</text>
+              </view>
+            </view>
+          </view>
+          <view wx:for="{{item.list}}" wx:for-item="fd" wx:key="uid" class="fd-row" data-meal="{{item.key}}" data-uid="{{fd.uid}}" bindtap="onFoodTap" hover-class="fd-row-h">
+            <text class="fd-emoji">{{fd.emoji}}</text>
+            <view class="fd-info"><text class="fd-name">{{fd.name}}</text><text class="fd-desc">{{fd.weight}}g · 碳{{fd.carbs}}g 蛋{{fd.protein}}g 脂{{fd.fat}}g</text></view>
+            <view class="fd-cal-box"><text class="fd-cal">{{fd.cal}}</text><text class="fd-unit">千卡</text></view>
+          </view>
+          <view wx:if="{{!item.isLast}}" class="mb-divider"></view>
+        </view>
+      </block>
+    </view>
+
+    <view style="height:260rpx"></view>
+  </scroll-view>
+
+  <!-- AI遮罩 -->
+  <view wx:if="{{showAiPanel}}" class="ai-mask {{aiMaskClosing?'ai-mask-out':''}}" bindtap="onAiCollapse"></view>
+  <!-- AI形态变化 -->
+  <view class="ai-morph {{aiExpanded?'ai-expanded':''}}" catchtap="onAiMorphTap">
+    <view class="ai-bub"><view class="ai-bub-glow"></view><text class="ai-bub-ico">✨</text><text class="ai-bub-lbl">AI</text></view>
+    <view class="ai-pan">
+      <view class="ai-pan-hd">
+        <view class="ai-pan-title"><text class="ai-pt-ico">✨</text><text class="ai-pt-txt">AI识热量</text></view>
+        <view class="ai-pan-close" catchtap="onAiCollapse"><text class="ai-pan-x">✕</text></view>
+      </view>
+      <view class="ai-pan-body">
+        <view class="ai-tabs">
+          <view class="ai-tab {{aiMode==='text'?'ai-tab-on':''}}" data-m="text" catchtap="onAiMode"><text>📝 文字描述</text></view>
+          <view class="ai-tab {{aiMode==='photo'?'ai-tab-on':''}}" data-m="photo" catchtap="onAiMode"><text>📷 拍照识别</text></view>
+        </view>
+        <view wx:if="{{aiMode==='text'}}" class="ai-inp-row">
+          <input class="ai-inp" placeholder="如：一碗米饭+200g鸡胸肉+一个苹果..." placeholder-class="ai-ph" value="{{aiInputText}}" bindinput="onAiInput" bindconfirm="onAiSend" confirm-type="send"/>
+          <view class="ai-send {{aiInputText.length>0&&!aiLoading?'ai-send-on':''}}" catchtap="onAiSend"><text class="ai-send-t">›</text></view>
+        </view>
+        <view wx:if="{{aiMode==='photo'}}" class="ai-photo">
+          <block wx:if="{{!aiImagePreview&&!aiLoading&&!aiFoods.length}}">
+            <view class="ai-cam" catchtap="onAiPhoto" hover-class="ai-cam-h"><text class="ai-cam-ico">📷</text><text class="ai-cam-tip">点击重新拍照</text></view>
+          </block>
+          <block wx:if="{{aiImagePreview}}">
+            <view class="ai-prev"><image class="ai-prev-img" src="{{aiImagePreview}}" mode="aspectFill"/><text class="ai-prev-lbl">已选择图片</text><view class="ai-prev-del" catchtap="onAiRemoveImg"><text class="ai-prev-x">✕</text></view></view>
+          </block>
+        </view>
+        <view wx:if="{{aiLoading}}" class="ai-ld"><view class="ai-ld-dots"><view class="ai-ld-dot"></view><view class="ai-ld-dot"></view><view class="ai-ld-dot"></view></view><text class="ai-ld-txt">AI正在分析食物营养...</text></view>
+        <view wx:if="{{aiError&&!aiLoading}}" class="ai-err"><text class="ai-err-ico">😅</text><text class="ai-err-txt">{{aiError}}</text><view class="ai-retry" catchtap="onAiRetry"><text>重新识别</text></view></view>
+        <view wx:if="{{aiFoods.length>0}}" class="ai-results">
+          <view wx:for="{{aiFoods}}" wx:key="idx" class="ai-fcard">
+            <view class="afc-top"><text class="afc-emo">{{item.emoji}}</text><view class="afc-info"><text class="afc-name">{{item.name}}</text><text class="afc-serv" wx:if="{{item.serving}}">{{item.serving}}</text></view></view>
+            <view class="afc-nutri">
+              <view class="afn"><text class="afn-i">🔥</text><text class="afn-v">{{item.cal}}</text><text class="afn-l">千卡</text></view>
+              <view class="afn"><text class="afn-i">🍚</text><text class="afn-v afn-c">{{item.c}}g</text><text class="afn-l">碳水</text></view>
+              <view class="afn"><text class="afn-i">🥩</text><text class="afn-v afn-p">{{item.p}}g</text><text class="afn-l">蛋白</text></view>
+              <view class="afn"><text class="afn-i">🫒</text><text class="afn-v afn-f">{{item.f}}g</text><text class="afn-l">脂肪</text></view>
+            </view>
+            <view class="afc-gram">
+              <view class="afc-stepper"><view class="afc-btn" data-idx="{{index}}" data-d="-10" catchtap="onAiGramStep">−</view><input class="afc-inp" type="number" value="{{item.grams}}" data-idx="{{index}}" bindinput="onAiGramInput"/><view class="afc-btn afc-btn-p" data-idx="{{index}}" data-d="10" catchtap="onAiGramStep">+</view></view>
+              <text class="afc-unit">克</text>
+            </view>
+            <view class="afc-quick">
+              <view class="afq {{item.grams===50?'afq-on':''}}" data-idx="{{index}}" data-g="50" catchtap="onAiGramQuick">50g</view>
+              <view class="afq {{item.grams===100?'afq-on':''}}" data-idx="{{index}}" data-g="100" catchtap="onAiGramQuick">100g</view>
+              <view class="afq {{item.grams===150?'afq-on':''}}" data-idx="{{index}}" data-g="150" catchtap="onAiGramQuick">150g</view>
+              <view class="afq {{item.grams===200?'afq-on':''}}" data-idx="{{index}}" data-g="200" catchtap="onAiGramQuick">200g</view>
+            </view>
+            <view class="afc-cal"><text class="afc-cn">{{item.curCal}}</text><text class="afc-cu"> 千卡</text></view>
+          </view>
+          <view class="ai-total"><text class="ai-total-l">合计</text><text class="ai-total-n">{{aiTotalCal}}</text><text class="ai-total-u"> 千卡</text></view>
+          <view class="ai-ml">选择添加到：</view>
+          <view class="ai-meals">
+            <view wx:for="{{['breakfast','lunch','dinner','snack_morning','snack_afternoon','snack_evening']}}" wx:key="*this" class="aim {{aiMeal===item?'aim-on':''}}" data-meal="{{item}}" catchtap="onAiMealPick">
+              <text class="aim-e">{{item==='breakfast'?'🍳':item==='lunch'?'🍔':item==='dinner'?'🍲':item==='snack_morning'?'🍪':item==='snack_afternoon'?'🧁':'🍎'}}</text>
+              <text class="aim-t">{{item==='breakfast'?'早餐':item==='lunch'?'午餐':item==='dinner'?'晚餐':item==='snack_morning'?'早加餐':item==='snack_afternoon'?'午加餐':'晚加餐'}}</text>
+            </view>
+          </view>
+          <view class="ai-foot"><view class="ai-foot-retry" catchtap="onAiRetry"><text>↩ 重新识别</text></view><view class="ai-foot-ok" catchtap="onAiConfirm" hover-class="ai-foot-ok-h">✅ 确认添加</view></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加餐遮罩 -->
+  <view wx:if="{{showSnackPicker}}" class="snack-mask" bindtap="onSnackClose"></view>
+
+  <!-- 底部导航 -->
+  <view class="bnav-wrap">
+    <view class="snack-expand {{showSnackPicker?'snack-show':''}}" catchtap="preventBubble">
+      <view class="se-item" data-key="snack_morning" bindtap="onSnackPick" hover-class="se-h"><text class="se-emoji">🍪</text><text class="se-text">+早加餐</text></view>
+      <view class="se-item" data-key="snack_afternoon" bindtap="onSnackPick" hover-class="se-h"><text class="se-emoji">🧁</text><text class="se-text">+午加餐</text></view>
+      <view class="se-item" data-key="snack_evening" bindtap="onSnackPick" hover-class="se-h"><text class="se-emoji">🍎</text><text class="se-text">+晚加餐</text></view>
+    </view>
+    <view class="bnav">
+      <view class="bn-item" data-type="breakfast" bindtap="onNavTap" hover-class="bn-h"><text class="bn-icon">🍳</text><text class="bn-text">+早餐</text></view>
+      <view class="bn-item" data-type="lunch" bindtap="onNavTap" hover-class="bn-h"><text class="bn-icon">🍔</text><text class="bn-text">+午餐</text></view>
+      <view class="bn-item" data-type="dinner" bindtap="onNavTap" hover-class="bn-h"><text class="bn-icon">🍲</text><text class="bn-text">+晚餐</text></view>
+      <view class="bn-item" data-type="snack" bindtap="onNavTap" hover-class="bn-h"><text class="bn-icon">🍎</text><text class="bn-text">+加餐</text></view>
+    </view>
+  </view>
+
+  <!-- 日历弹窗 -->
+  <view wx:if="{{showCalendar}}" class="cal-mask" bindtap="onCalClose"></view>
+  <view class="cal-pop {{showCalendar?'cal-show':''}}" catchtap="preventBubble">
+    <view class="cal-hd"><view class="cal-ar" bindtap="onCalPrev" hover-class="cal-ar-h"><text>‹</text></view><text class="cal-month">{{calMonthLabel}}</text><view class="cal-ar" bindtap="onCalNext" hover-class="cal-ar-h"><text>›</text></view></view>
+    <view class="cal-wk"><text class="cal-wk-t" wx:for="{{['日','一','二','三','四','五','六']}}" wx:key="*this">{{item}}</text></view>
+    <view class="cal-grid">
+      <view wx:for="{{calCells}}" wx:key="key" class="cal-cell {{item.empty?'ce':''}} {{item.isToday?'ct':''}} {{item.isSelected?'cs':''}} {{item.isFuture?'cf':''}}" data-date="{{item.dateStr}}" bindtap="onCalDayTap">
+        <text wx:if="{{!item.empty}}" class="cal-num">{{item.day}}</text>
+        <view wx:if="{{item.hasRecord}}" class="cal-dot"></view>
+      </view>
+    </view>
+    <view class="cal-foot"><view class="cal-btn-today" bindtap="onCalGoToday" hover-class="cal-btn-h">回到今天</view><view class="cal-btn-ok" bindtap="onCalConfirm" hover-class="cal-btn-h">确定</view></view>
+  </view>
+
+  <!-- 编辑底弹层 -->
+  <view wx:if="{{showEdit}}" class="ed-mask" bindtap="onEditOverlay"></view>
+  <view class="ed-sheet {{showEdit?'ed-show':''}}" catchtap="preventBubble">
+    <view class="ed-handle"><view class="ed-bar"></view></view>
+    <view class="ed-head"><text class="ed-emoji">{{editEmoji}}</text><text class="ed-name">{{editName}}</text></view>
+    <view class="ed-macros">
+      <view class="edm"><text class="edm-icon">🍚</text><text class="edm-v c">{{editC}}g</text><text class="edm-l">碳水</text></view>
+      <view class="edm"><text class="edm-icon">🥩</text><text class="edm-v p">{{editP}}g</text><text class="edm-l">蛋白质</text></view>
+      <view class="edm"><text class="edm-icon">🫒</text><text class="edm-v f">{{editF}}g</text><text class="edm-l">脂肪</text></view>
+    </view>
+    <view class="ed-gram">
+      <view class="ed-stepper"><view class="ed-btn" data-d="-10" bindtap="onEditStep" hover-class="ed-btn-h">−</view><input class="ed-input" type="number" value="{{editGrams}}" bindinput="onEditInput"/><view class="ed-btn ed-btn-p" data-d="10" bindtap="onEditStep" hover-class="ed-btn-h">+</view></view>
+      <text class="ed-unit">克</text>
+    </view>
+    <view class="ed-quick">
+      <view class="eq {{editGrams===50?'eq-on':''}}" data-g="50" bindtap="onEditQuick">50g</view>
+      <view class="eq {{editGrams===100?'eq-on':''}}" data-g="100" bindtap="onEditQuick">100g</view>
+      <view class="eq {{editGrams===150?'eq-on':''}}" data-g="150" bindtap="onEditQuick">150g</view>
+      <view class="eq {{editGrams===200?'eq-on':''}}" data-g="200" bindtap="onEditQuick">200g</view>
+    </view>
+    <view class="ed-cal-dis"><text class="ed-cal-n">{{editCal}}</text><text class="ed-cal-s"> 千卡</text></view>
+    <view class="ed-save" bindtap="onEditSave" hover-class="ed-save-h">保存修改</view>
+    <view class="ed-del" bindtap="onEditDelete" hover-class="ed-del-h">删除记录</view>
+  </view>
+
+  <!-- 删除确认弹窗 -->
+  <view wx:if="{{showDelModal}}" class="dm-mask" bindtap="onDelCancel"></view>
+  <view wx:if="{{showDelModal}}" class="dm-box" catchtap="preventBubble">
+    <view class="dm-deco">✦</view>
+    <view class="dm-icon-ring"><text class="dm-emoji">🍽️</text><view class="dm-qm">?</view></view>
+    <text class="dm-title">删除这条记录吗？</text>
+    <text class="dm-desc">删除后将无法恢复哦~</text>
+    <view class="dm-btns">
+      <view class="dm-btn dm-cancel" bindtap="onDelCancel" hover-class="dm-btn-h"><text class="dm-btn-t">再想想</text></view>
+      <view class="dm-btn dm-ok" bindtap="onDelConfirm" hover-class="dm-btn-h"><text class="dm-btn-t dm-btn-tw">确认删除</text></view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,130 @@
+<!-- pages/profile/profile.wxml -->
+<scroll-view scroll-y class="page-scroll" enhanced show-scrollbar="{{false}}">
+  <view class="profile-wrap">
+
+    <!-- Header -->
+    <view class="profile-header">
+      <view class="header-icon">{{isEdit ? '✏️' : '🍋'}}</view>
+      <text class="title">{{isEdit ? '编辑资料' : '你好呀！'}}</text>
+      <text class="desc">{{isEdit ? '修改个人信息' : '花一分钟告诉小柠关于你~'}}</text>
+    </view>
+
+    <!-- 昵称 & 性别 -->
+    <view class="card">
+      <view class="card-row">
+        <view class="field flex-1">
+          <text class="field-label">昵称</text>
+          <input class="field-input" placeholder="起个可爱的名字"
+                 value="{{nickname}}" bindinput="setNickname" />
+        </view>
+      </view>
+
+      <view class="divider"></view>
+
+      <view class="field">
+        <text class="field-label">性别</text>
+        <view class="gender-row">
+          <view class="gender-chip {{gender=='female'?'sel-gf':''}}"
+                bindtap="setGender" data-g="female">
+            <text class="g-icon">👩</text>
+            <text class="g-text">女生</text>
+          </view>
+          <view class="gender-chip {{gender=='male'?'sel-gm':''}}"
+                bindtap="setGender" data-g="male">
+            <text class="g-icon">👨</text>
+            <text class="g-text">男生</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 身体数据 -->
+    <view class="card">
+      <text class="card-title">📐 身体数据</text>
+      <view class="metrics-grid">
+        <view class="metric-box">
+          <input class="metric-input" placeholder="—" type="digit"
+                 value="{{age}}" bindinput="setAge" />
+          <text class="metric-unit">年龄</text>
+        </view>
+        <view class="metric-box">
+          <input class="metric-input" placeholder="—" type="digit"
+                 value="{{height}}" bindinput="setHeight" />
+          <text class="metric-unit">身高 cm</text>
+        </view>
+        <view class="metric-box">
+          <input class="metric-input" placeholder="—" type="digit"
+                 value="{{weight}}" bindinput="setWeight" />
+          <text class="metric-unit">体重 kg</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 目标 -->
+    <view class="card">
+      <text class="card-title">🎯 健身目标</text>
+      <view class="option-grid">
+        <view class="opt-item {{goal==0?'opt-sel-pink':''}}"
+              bindtap="setGoal" data-i="0">
+          <text class="opt-icon">🔥</text>
+          <text class="opt-label">减脂塑形</text>
+        </view>
+        <view class="opt-item {{goal==1?'opt-sel-green':''}}"
+              bindtap="setGoal" data-i="1">
+          <text class="opt-icon">💪</text>
+          <text class="opt-label">增肌增重</text>
+        </view>
+        <view class="opt-item {{goal==2?'opt-sel-blue':''}}"
+              bindtap="setGoal" data-i="2">
+          <text class="opt-icon">⚖️</text>
+          <text class="opt-label">维持现状</text>
+        </view>
+        <view class="opt-item {{goal==3?'opt-sel-purple':''}}"
+              bindtap="setGoal" data-i="3">
+          <text class="opt-icon">🧘</text>
+          <text class="opt-label">健康调理</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 活动量 -->
+    <view class="card">
+      <text class="card-title">🏃 日常活动量</text>
+      <view class="option-grid">
+        <view class="opt-item {{act==0?'opt-sel-purple':''}}"
+              bindtap="setAct" data-i="0">
+          <text class="opt-icon">🪑</text>
+          <text class="opt-label">久坐不动</text>
+          <text class="opt-hint">几乎不运动</text>
+        </view>
+        <view class="opt-item {{act==1?'opt-sel-blue':''}}"
+              bindtap="setAct" data-i="1">
+          <text class="opt-icon">🚶</text>
+          <text class="opt-label">轻度活动</text>
+          <text class="opt-hint">每周1-3次</text>
+        </view>
+        <view class="opt-item {{act==2?'opt-sel-green':''}}"
+              bindtap="setAct" data-i="2">
+          <text class="opt-icon">🏃</text>
+          <text class="opt-label">中度活动</text>
+          <text class="opt-hint">每周3-5次</text>
+        </view>
+        <view class="opt-item {{act==3?'opt-sel-pink':''}}"
+              bindtap="setAct" data-i="3">
+          <text class="opt-icon">🏋️</text>
+          <text class="opt-label">高强度</text>
+          <text class="opt-hint">每周6-7次</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="btn-area">
+      <button class="btn-save" bindtap="save">
+        {{isEdit ? '保存修改 ✨' : '开始我的旅程 🚀'}}
+      </button>
+    </view>
+
+    <view class="footer-space"></view>
+  </view>
+</scroll-view>

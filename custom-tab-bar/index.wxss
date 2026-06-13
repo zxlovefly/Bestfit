@@ -1,0 +1,143 @@
+/* ======================== Tab Bar ======================== */
+.tab-bar-wrap { position: relative; z-index: 9990; }
+
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 116rpx;
+  display: flex; align-items: flex-end; justify-content: space-around;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 0 4rpx;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4rpx 32rpx rgba(0,0,0,0.06);
+  z-index: 9990;
+  background-image: linear-gradient(90deg, transparent 26%, rgba(251,114,153,0.28) 50%, transparent 74%);
+  background-size: 100% 2rpx;
+  background-repeat: no-repeat;
+  background-position: top;
+}
+
+/* ======================== Tab Items ======================== */
+.tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  padding: 6rpx 0 10rpx; position: relative;
+}
+.tab-icon-wrap {
+  width: 52rpx; height: 52rpx;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 2rpx;
+}
+.tab-icon { font-size: 36rpx; opacity: 0.3; transition: opacity 0.25s, transform 0.25s; }
+.tab-text { font-size: 19rpx; color: #b0adb8; font-weight: 500; letter-spacing: 1rpx; transition: color 0.25s; }
+
+.tab-active .tab-icon { opacity: 1; transform: scale(1.06); }
+.tab-active .tab-text { color: #FB7299; font-weight: 700; }
+
+.tab-item.tab-active::after {
+  content: ''; position: absolute; bottom: 2rpx; left: 50%;
+  width: 7rpx; height: 7rpx; border-radius: 50%; background: #FB7299;
+  animation: dotPop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes dotPop {
+  0%   { transform: translateX(-50%) scale(0); opacity: 0; }
+  60%  { transform: translateX(-50%) scale(1.5); }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+.tab-center.tab-active::after { display: none; }
+
+/* ======================== BAI 按钮 ======================== */
+.tab-center { padding-top: 6rpx; }
+
+.bai-wrap {
+  position: relative;
+  width: 64rpx; height: 64rpx;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 2rpx;
+}
+
+/* 外层光晕 */
+.bai-glow {
+  position: absolute; top: 50%; left: 50%;
+  width: 72rpx; height: 72rpx;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(100,210,255,0.18) 0%, transparent 70%);
+  animation: baiGlow 3s ease-in-out infinite;
+}
+.tab-active .bai-glow {
+  background: radial-gradient(circle, rgba(251,114,153,0.22) 0%, transparent 70%);
+  animation-name: baiGlowActive;
+}
+@keyframes baiGlow {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+  50%      { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+}
+@keyframes baiGlowActive {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
+  50%      { transform: translate(-50%, -50%) scale(1.35); opacity: 1; }
+}
+
+/* ★ 流动光环 — 围绕 B 图标旋转的渐变弧线 */
+.bai-orbit {
+  position: absolute; top: -6rpx; left: -6rpx;
+  width: 76rpx; height: 76rpx;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(100,210,255,0.0) 30deg,
+    rgba(100,210,255,0.55) 90deg,
+    rgba(180,140,255,0.45) 150deg,
+    rgba(251,114,153,0.0) 210deg,
+    transparent 360deg
+  );
+  animation: orbitSpin 2.8s linear infinite;
+  -webkit-mask: radial-gradient(circle, transparent 56%, #000 57%, #000 100%);
+  mask: radial-gradient(circle, transparent 56%, #000 57%, #000 100%);
+}
+.tab-active .bai-orbit {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(251,114,153,0.0) 30deg,
+    rgba(251,114,153,0.65) 90deg,
+    rgba(255,180,120,0.5) 150deg,
+    rgba(251,114,153,0.0) 210deg,
+    transparent 360deg
+  );
+  animation-duration: 2s;
+}
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+
+/* ★ B 字母 */
+.bai-b {
+  position: relative; z-index: 2;
+  font-size: 36rpx; font-weight: 900;
+  color: #1a1a2e;
+  text-shadow: none;
+}
+.tab-active .bai-b {
+  color: #0d0d1a;
+  text-shadow: 0 0 10rpx rgba(251,114,153,0.3);
+}
+
+/* ★ AI 右上角 */
+.bai-ai {
+  position: absolute; top: 6rpx; right: 4rpx; z-index: 2;
+  font-size: 13rpx; font-weight: 800;
+  color: rgba(26,26,46,0.5);
+  letter-spacing: 1rpx;
+}
+.tab-active .bai-ai {
+  color: #1a1a2e;
+  text-shadow: 0 0 6rpx rgba(251,114,153,0.3);
+}
+
+.tab-active .bai-wrap .bai-glow {
+  box-shadow: 0 0 20rpx rgba(251,114,153,0.15);
+}
+
+.center-text { font-size: 17rpx !important; color: #999 !important; margin-top: 2rpx; }
+.tab-active .center-text { color: #FB7299 !important; }

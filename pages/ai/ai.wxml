@@ -1,0 +1,281 @@
+<view class="page">
+
+<!-- 导航栏 -->
+<view class="nav-bar" style="padding-top:{{statusBarHeight}}px;">
+  <view class="nav-inner">
+    <view class="nav-clear" wx:if="{{messages.length > 0}}" bindtap="onClearChat"><text class="nav-clear-txt">清空</text></view>
+  </view>
+</view>
+
+<view class="fast-tip" wx:if="{{fastMode && !showWelcome}}"><text class="ft-txt">⚡ 快速模式</text></view>
+
+<scroll-view class="chat-area" scroll-y scroll-into-view="{{scrollToView}}" scroll-with-animation enhanced show-scrollbar="{{false}}">
+
+  <view class="welcome" wx:if="{{showWelcome}}">
+    <view class="w-av-wrap">
+      <view class="w-avatar"><view class="w-av-shine"></view><text class="w-av-letter">B</text></view>
+    </view>
+    <text class="w-title">你好，我是你的健身助手</text>
+    <text class="w-sub">减肥 · 饮食 · 运动 · 拍照识食物</text>
+
+    <view class="profile-tag" wx:if="{{profileLoaded}}">
+      <text class="pt-ico">✦</text>
+      <text class="pt-txt">{{profileNickname ? 'Hi ' + profileNickname + '，' : ''}}已加载身体数据</text>
+    </view>
+
+    <view class="profile-nav" wx:else>
+      <view class="pn-btn" bindtap="goInfoPage">
+        <view class="pn-icon-ring"><text class="pn-ico">📝</text></view>
+        <view class="pn-info">
+          <text class="pn-title">填写个人信息</text>
+          <text class="pn-desc">身高、体重、年龄</text>
+        </view>
+        <text class="pn-arrow">›</text>
+      </view>
+      <view class="pn-btn" bindtap="goGoalPage">
+        <view class="pn-icon-ring"><text class="pn-ico">🎯</text></view>
+        <view class="pn-info">
+          <text class="pn-title">设定健身目标</text>
+          <text class="pn-desc">减脂 / 增肌 / 维持</text>
+        </view>
+        <text class="pn-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="sug-grid">
+      <view class="sug-card" data-text="根据我的身体数据，帮我制定一周减脂餐计划" bindtap="onTapSuggest">
+        <text class="sug-dot">●</text>
+        <view class="sug-info">
+          <text class="sug-title">定制一周减脂餐计划</text>
+          <text class="sug-desc">基于你的体重和目标热量</text>
+        </view>
+      </view>
+      <view class="sug-card" data-text="根据我的活动水平，推荐适合我的居家运动" bindtap="onTapSuggest">
+        <text class="sug-dot">●</text>
+        <view class="sug-info">
+          <text class="sug-title">推荐适合我的运动方案</text>
+          <text class="sug-desc">根据你的体脂和目标定制</text>
+        </view>
+      </view>
+      <view class="sug-card" data-text="100g鸡胸肉的热量和营养素是多少" bindtap="onTapSuggest">
+        <text class="sug-dot">●</text>
+        <view class="sug-info">
+          <text class="sug-title">食物热量查询</text>
+          <text class="sug-desc">鸡胸肉 · 牛肉 · 鸡蛋 · 虾仁</text>
+        </view>
+      </view>
+      <view class="sug-card" data-text="帮我分析目前的训练计划是否合理" bindtap="onTapSuggest">
+        <text class="sug-dot">●</text>
+        <view class="sug-info">
+          <text class="sug-title">分析训练计划</text>
+          <text class="sug-desc">告诉我你的计划，我来评估</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="cam-hint">
+      <view class="ch-ico"><view class="ch-body"></view><view class="ch-lens"></view></view>
+      <text class="ch-txt">拍食物照片，自动估算热量</text>
+    </view>
+  </view>
+
+  <view class="msg-list" wx:if="{{!showWelcome}}">
+    <view wx:for="{{messages}}" wx:key="id" id="{{item.id}}" class="msg-row {{item.role==='user'?'row-r':'row-l'}}">
+      <view class="msg-av" wx:if="{{item.role==='assistant'}}">
+        <view class="av-c"><view class="av-shine"></view><text class="av-t">B</text></view>
+      </view>
+      <view class="msg-col">
+        <view wx:if="{{item.role==='assistant' && (item.isThinking || item.thinkingDone)}}" class="think-card {{item.isThinking ? 'tc-glow' : ''}}">
+          <view class="think-hd" bindtap="onToggleThink" data-id="{{item.id}}">
+            <view class="think-ico-wrap"><view class="think-bulb"></view><view class="think-pulse" wx:if="{{item.isThinking}}"></view></view>
+            <view class="think-lbl-row" wx:if="{{item.isThinking}}">
+              <text class="think-lbl-on">深度思考中</text>
+              <view class="think-dots"><view class="td td1"></view><view class="td td2"></view><view class="td td3"></view></view>
+            </view>
+            <text class="think-lbl" wx:else>{{item.showThinking ? '收起思考过程' : '查看思考过程'}}</text>
+            <view class="think-chv {{item.showThinking ? 'chv-up' : ''}}"></view>
+          </view>
+          <view class="think-bd {{item.showThinking ? 'bd-open' : 'bd-shut'}}">
+            <view class="think-sep"></view>
+            <text class="think-txt">{{item.thinkingContent}}</text>
+          </view>
+          <view wx:if="{{item.isThinking}}" class="think-skip" catchtap="onSkipAll" data-id="{{item.id}}">
+            <text class="think-skip-txt">跳过思考 ›</text>
+          </view>
+        </view>
+
+        <view class="bubble {{item.role==='user'?'bub-u':'bub-a'}}" wx:if="{{item.content || (item.typing && !item.isThinking)}}">
+          <image wx:if="{{item.image}}" class="msg-img" src="{{item.image}}" mode="widthFix" data-src="{{item.image}}" bindtap="onPreviewImage"/>
+          <view class="typing-dots" wx:if="{{!item.content && item.typing}}">
+            <view class="btd btd1"></view><view class="btd btd2"></view><view class="btd btd3"></view>
+          </view>
+          <view wx:if="{{item.content && item.typing}}" class="content-wrap">
+            <text class="msg-txt" user-select>{{item.content}}</text><text class="stream-cursor">▍</text>
+          </view>
+          <rich-text wx:if="{{!item.typing && item.htmlContent}}" nodes="{{item.htmlContent}}" class="msg-rich"/>
+          <text wx:if="{{!item.typing && !item.htmlContent && item.content}}" class="msg-txt" user-select>{{item.content}}</text>
+        </view>
+        <view wx:if="{{item.typing && item.thinkingDone}}" class="skip-wrap" catchtap="onSkipAll" data-id="{{item.id}}">
+          <text class="skip-txt">跳过输出 ›</text>
+        </view>
+
+        <view wx:if="{{item.actionResults && item.actionResults.length > 0}}" class="action-results">
+          <view wx:for="{{item.actionResults}}" wx:key="index" wx:for-item="rst" class="action-badge">
+            <text class="action-badge-txt">{{rst.text}}</text>
+            <view wx:if="{{rst.detailUrl}}" class="action-detail" data-url="{{rst.detailUrl}}" data-type="{{rst.type}}" catchtap="onActionDetail">
+              <text class="detail-txt">详情 ›</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view id="bottom-anchor" style="height:40rpx;"></view>
+</scroll-view>
+
+<!-- 清空确认弹窗 -->
+<view class="modal-mask" wx:if="{{showClearModal}}" bindtap="onCancelClear">
+  <view class="modal-box" catchtap="">
+    <view class="modal-deco">✦</view>
+    <view class="modal-icon-ring"><view class="modal-icon"><text class="modal-emoji">✕</text></view></view>
+    <text class="modal-title">确定要清空吗？</text>
+    <text class="modal-desc">所有对话记录将被删除</text>
+    <view class="modal-btns">
+      <view class="mbtn mbtn-cancel" bindtap="onCancelClear"><text class="mbtn-txt">取消</text></view>
+      <view class="mbtn mbtn-confirm" bindtap="onConfirmClear"><text class="mbtn-txt mbtn-txt-w">确认清空</text></view>
+    </view>
+  </view>
+</view>
+
+<!-- 底部栏 -->
+<view class="btm-wrap" style="padding-bottom:{{bottomPad}}px;">
+  <view class="pre-bar" wx:if="{{selectedImagePreview}}">
+    <image class="pre-thumb" src="{{selectedImagePreview}}" mode="aspectFill"/>
+    <view class="pre-del" bindtap="onRemoveImage"><text class="pre-del-x">✕</text></view>
+    <text class="pre-tip">将随消息发送</text>
+  </view>
+
+  <!-- 药丸栏 -->
+  <scroll-view class="action-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="action-pills">
+      <view class="ap ap-water {{actionMode==='water'?'ap-on':''}}" data-mode="water" bindtap="onSetActionMode">
+        <text class="ap-ico">💧</text><text class="ap-label">记喝水</text>
+      </view>
+      <view class="ap ap-account {{actionMode==='account'?'ap-on':''}}" data-mode="account" bindtap="onSetActionMode">
+        <text class="ap-ico">💰</text><text class="ap-label">记一笔</text>
+      </view>
+      <view class="ap ap-body {{actionMode==='body'?'ap-on':''}}" data-mode="body" bindtap="onSetActionMode">
+        <text class="ap-ico">📝</text><text class="ap-label">改数据</text>
+      </view>
+      <view class="ap ap-period {{actionMode==='period'?'ap-on':''}}" data-mode="period" bindtap="onSetActionMode">
+        <text class="ap-ico">🩸</text><text class="ap-label">经期</text>
+      </view>
+      <view class="ap ap-diet {{actionMode==='diet'?'ap-on':''}}" data-mode="diet" bindtap="onSetActionMode">
+        <text class="ap-ico">🍽️</text><text class="ap-label">饮食记录</text>
+      </view>
+      <view class="ap ap-sport {{actionMode==='sport'?'ap-on':''}}" data-mode="sport" bindtap="onSetActionMode">
+        <text class="ap-ico">🏃</text><text class="ap-label">记录运动</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 非运动模式提示条 -->
+  <view class="prompt-bar pb-{{actionMode}}" wx:if="{{actionMode && actionMode !== 'sport'}}">
+    <view class="pb-left">
+      <view class="pb-icon-ring pb-ir-{{actionMode}}">
+        <text class="pb-ico">{{actionMode==='water'?'💧':actionMode==='account'?'💰':actionMode==='period'?'🩸':'📝'}}</text>
+      </view>
+      <view class="pb-texts">
+        <text class="pb-title">{{actionMode==='water'?'记录喝水':actionMode==='account'?'记录账单':actionMode==='period'?'记录经期':'修改数据'}}</text>
+        <text class="pb-hint">{{actionMode==='water'?'输入量或点按钮':actionMode==='account'?'输入如：午餐25元':actionMode==='period'?'点按钮或输入':'输入如：体重65kg'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{actionMode==='water'}}" class="pb-quick">
+      <view class="pq-btn pq-water" data-amt="250" bindtap="onQuickWater"><text class="pq-txt">250ml</text></view>
+      <view class="pq-btn pq-water" data-amt="500" bindtap="onQuickWater"><text class="pq-txt">500ml</text></view>
+    </view>
+    <view wx:if="{{actionMode==='period'}}" class="pb-quick">
+      <view class="pq-btn pq-start" data-action="start" bindtap="onPeriodQuick"><text class="pq-txt">经期来了</text></view>
+      <view class="pq-btn pq-end" data-action="end" bindtap="onPeriodQuick"><text class="pq-txt">经期结束</text></view>
+    </view>
+    <view wx:if="{{actionMode==='diet'}}" class="pb-quick">
+      <view class="pq-btn pq-diet" data-food="鸡胸肉200g" bindtap="onQuickDiet"><text class="pq-txt">鸡胸肉</text></view>
+      <view class="pq-btn pq-diet" data-food="沙拉300大卡" bindtap="onQuickDiet"><text class="pq-txt">沙拉</text></view>
+    </view>
+    <view class="pb-close" bindtap="onClearActionMode"><text class="pb-x">✕</text></view>
+  </view>
+
+  <!-- ===== 运动面板 ===== -->
+  <view class="sport-panel-mask {{actionMode==='sport'?'sp-show':''}}" bindtap="onClearActionMode"></view>
+  <view class="sport-panel {{actionMode==='sport'?'sp-show':''}}">
+    <view class="sp-handle"><view class="sp-handle-bar"></view></view>
+
+    <view class="sp-header">
+      <view class="sp-title-row">
+        <view class="sp-title-icon"><text class="sp-title-emoji">🏃</text></view>
+        <view class="sp-title-texts">
+          <text class="sp-title">记录运动</text>
+          <text class="sp-subtitle">点击快速记录，或在下方输入</text>
+        </view>
+        <view class="sp-close" bindtap="onClearActionMode"><text class="sp-close-x">✕</text></view>
+      </view>
+    </view>
+
+    <scroll-view class="sp-body" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="sp-grid">
+        <view class="sp-card" wx:for="{{sportQuickList}}" wx:key="name"
+              data-sport="{{item.data}}" bindtap="onQuickSport">
+          <view class="spc-emoji-ring">
+            <text class="spc-emoji">{{item.emoji}}</text>
+          </view>
+          <text class="spc-name">{{item.name}}</text>
+          <text class="spc-meta">{{item.min}}min · {{item.cal}}kcal</text>
+        </view>
+      </view>
+
+      <view class="sp-browse" bindtap="goAddSport">
+        <view class="spb-left">
+          <text class="spb-ico">📋</text>
+          <text class="spb-text">浏览全部运动项目</text>
+        </view>
+        <text class="spb-arrow">›</text>
+      </view>
+
+      <view class="sp-custom-hint">
+        <view class="spch-line"></view>
+        <text class="spch-text">或输入自定义运动</text>
+        <view class="spch-line"></view>
+      </view>
+
+      <view class="sp-examples">
+        <view class="spe-tag" data-sport="打羽毛球60分钟" bindtap="onQuickSport"><text class="spe-txt">🏸 羽毛球1小时</text></view>
+        <view class="spe-tag" data-sport="跑步机爬坡30分钟" bindtap="onQuickSport"><text class="spe-txt">🏔 跑步机30分</text></view>
+        <view class="spe-tag" data-sport="广场舞45分钟" bindtap="onQuickSport"><text class="spe-txt">💃 广场舞45分</text></view>
+      </view>
+
+      <view style="height:16rpx"></view>
+    </scroll-view>
+  </view>
+
+  <!-- 输入栏 -->
+  <view class="inp-bar">
+    <view class="stop-btn" wx:if="{{isLoading}}" bindtap="onStopGenerate"><view class="stop-icon"></view></view>
+    <view class="mode-btn" bindtap="onToggleMode"><text class="mode-ico">{{fastMode ? '⚡' : '🧠'}}</text></view>
+    <view class="cam-btn" bindtap="onChooseImage">
+      <text class="cam-ico">📷</text>
+    </view>
+    <view class="inp-wrap {{actionMode==='water'?'inp-water':actionMode==='account'?'inp-account':actionMode==='body'?'inp-body':actionMode==='period'?'inp-period':actionMode==='diet'?'inp-diet':actionMode==='sport'?'inp-sport':''}}">
+      <input class="inp-field"
+        placeholder="{{actionMode==='water'?'输入喝水量...':actionMode==='account'?'输入消费或收入...':actionMode==='body'?'输入要修改的数据...':actionMode==='period'?'描述经期状态...':actionMode==='diet'?'输入食物名称/热量...':actionMode==='sport'?'输入如：打羽毛球1小时...':'问我健身、饮食、运动...'}}"
+        placeholder-class="inp-ph"
+        value="{{inputText}}"
+        bindinput="onInputChange"
+        bindconfirm="onSend"
+        confirm-type="send"/>
+    </view>
+    <view class="send-btn {{(inputText.length>0||selectedImagePreview)&&!isLoading?'send-on':''}}" bindtap="onSend">
+      <view class="send-arr"></view>
+    </view>
+  </view>
+</view>
+</view>

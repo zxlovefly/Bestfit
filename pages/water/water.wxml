@@ -1,0 +1,359 @@
+<!-- pages/water/water.wxml -->
+<view class="water-page">
+
+<!-- ============ 日期导航 ============ -->
+<view class="date-nav" wx:if="{{currentView === 'record'}}">
+  <view class="date-arrow" bindtap="prevDay">
+    <text class="arrow-left"></text>
+  </view>
+  <view class="date-display" bindtap="openDatePicker">
+    <text class="date-emoji">📅</text>
+    <text class="date-text">{{selectedDateDisplay}}</text>
+    <text class="date-badge" wx:if="{{isToday}}">今天</text>
+  </view>
+  <view class="date-arrow {{isToday ? 'arrow-disabled' : ''}}" bindtap="nextDay">
+    <text class="arrow-right"></text>
+  </view>
+</view>
+
+<!-- ============ 统计头部 ============ -->
+<view class="stats-header" wx:if="{{currentView === 'stats'}}">
+  <text class="stats-header-title">📊 数据统计</text>
+  <view class="stats-range-toggle">
+    <view class="range-btn {{statsRange === 7 ? 'range-active' : ''}}" bindtap="switchStatsRange" data-range="7">近7天</view>
+    <view class="range-btn {{statsRange === 30 ? 'range-active' : ''}}" bindtap="switchStatsRange" data-range="30">近30天</view>
+  </view>
+</view>
+
+<!-- ============ 记录视图 ============ -->
+<view wx:if="{{currentView === 'record'}}">
+
+  <!-- 目标卡片 -->
+  <view class="target-card">
+    <view class="target-header">
+      <text class="target-title">💧 喝水目标</text>
+      <view class="target-edit" bindtap="editTarget">
+        <text class="target-edit-icon">✏️</text>
+      </view>
+    </view>
+    <view class="target-values">
+      <view class="target-item">
+        <text class="target-label">目标</text>
+        <text class="target-number">{{waterTotalTargetML}}</text>
+        <text class="target-unit">ml</text>
+      </view>
+      <view class="target-item">
+        <text class="target-label">已喝</text>
+        <text class="target-number">{{waterTodayML}}</text>
+        <text class="target-unit">ml</text>
+      </view>
+      <view class="target-item">
+        <text class="target-label">剩余</text>
+        <text class="target-number">{{remainingML}}</text>
+        <text class="target-unit">ml</text>
+      </view>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progressPercent}}%"></view>
+    </view>
+    <text class="progress-text">已完成 {{progressPercent}}%</text>
+  </view>
+
+  <!-- 大水杯 -->
+  <view class="cup-card">
+    <view class="water-cup {{progressPercent >= 100 ? 'completed' : ''}}">
+      <view class="water-fill" style="height: {{progressPercent}}%; background: {{cupBgStyle}}">
+        <view class="water-wave"></view>
+      </view>
+      <view class="cup-text">
+        <text class="cup-ml">{{waterTodayML}} ml</text>
+        <text class="cup-percent">{{progressPercent}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷添加 -->
+  <view class="quick-card">
+    <view class="quick-title">⚡ 快捷添加</view>
+    <view class="quick-buttons">
+      <view class="quick-btn" wx:for="{{quickMLs}}" wx:key="index" bindtap="addQuick" data-ml="{{item}}">
+        <text class="quick-btn-ml">{{item}}ml</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 喝水记录列表 -->
+  <view class="records-card">
+    <view class="records-header">
+      <text class="records-title">📋 喝水记录</text>
+      <text class="records-count" wx:if="{{waterRecords.length > 0}}">{{waterRecords.length}}次 · {{waterTodayML}}ml</text>
+    </view>
+    <view wx:if="{{waterRecords.length === 0}}" class="empty-records">
+      <text class="empty-icon">🫧</text>
+      <text class="empty-text">还没有喝水记录哦~</text>
+    </view>
+    <view wx:else class="records-list">
+      <view class="record-item" wx:for="{{waterRecords}}" wx:key="index">
+        <view class="record-icon-wrap">
+          <text class="record-icon">{{item.icon}}</text>
+        </view>
+        <view class="record-info">
+          <text class="record-name">{{item.name}}</text>
+          <text class="record-time">{{item.time}}</text>
+        </view>
+        <view class="record-ml">{{item.ml}}ml</view>
+        <view class="record-actions">
+          <view class="record-edit" bindtap="editRecord" data-index="{{index}}">✏️</view>
+          <view class="record-delete" bindtap="deleteRecord" data-index="{{index}}">🗑️</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- ============ 统计视图 ============ -->
+<view wx:if="{{currentView === 'stats'}}">
+
+  <!-- 概览 -->
+  <view class="stats-summary">
+    <view class="summary-item">
+      <text class="summary-value">{{avgML}}</text>
+      <text class="summary-label">日均(ml)</text>
+    </view>
+    <view class="summary-divider"></view>
+    <view class="summary-item">
+      <text class="summary-value">{{completedDays}}/{{totalDaysInRange}}</text>
+      <text class="summary-label">达标天数</text>
+    </view>
+    <view class="summary-divider"></view>
+    <view class="summary-item">
+      <text class="summary-value">{{caffeineTotalMG}}</text>
+      <text class="summary-label">咖啡因(mg)</text>
+    </view>
+  </view>
+
+  <!-- 柱状图 -->
+  <view class="chart-card">
+    <text class="chart-title">📊 每日饮水量</text>
+    <scroll-view scroll-x enhanced show-scrollbar="false" class="bar-chart-scroll">
+      <view class="bar-chart">
+        <view class="bar-item" wx:for="{{barChartData}}" wx:key="date">
+          <text class="bar-value">{{item.value}}</text>
+          <view class="bar-track">
+            <view class="bar-fill {{item.value >= waterTotalTargetML ? 'bar-achieved' : ''}}" style="height: {{item.percent}}%"></view>
+          </view>
+          <text class="bar-label">{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="bar-target-line">
+      <text class="bar-target-label">目标 {{waterTotalTargetML}}ml</text>
+    </view>
+  </view>
+
+  <!-- 环形图 -->
+  <view class="chart-card">
+    <text class="chart-title">🍹 饮品种类占比</text>
+    <view class="ring-section">
+      <view class="ring-chart-wrap">
+        <view class="ring-chart" wx:if="{{!showRingEmpty}}" style="background: {{ringGradient}}">
+          <view class="ring-center">
+            <text class="ring-total">{{totalDaysInRange}}</text>
+            <text class="ring-unit">天</text>
+          </view>
+        </view>
+        <view class="ring-chart ring-empty" wx:if="{{showRingEmpty}}">
+          <view class="ring-center">
+            <text class="ring-total">0</text>
+            <text class="ring-unit">暂无</text>
+          </view>
+        </view>
+      </view>
+      <view class="ring-legend">
+        <view class="legend-item" wx:for="{{ringChartData}}" wx:key="type">
+          <view class="legend-dot" style="background: {{item.color}}"></view>
+          <text class="legend-name">{{item.icon}} {{item.name}}</text>
+          <text class="legend-percent">{{item.percent}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 饮品详情表格 -->
+  <view class="chart-card" wx:if="{{drinkTypeTable.length > 0}}">
+    <text class="chart-title">📋 饮品详情</text>
+    <view class="stats-table">
+      <view class="table-header">
+        <text class="th th-type">饮品类型</text>
+        <text class="th th-count">次数</text>
+        <text class="th th-vol">摄入量</text>
+      </view>
+      <view class="table-row" wx:for="{{drinkTypeTable}}" wx:key="type">
+        <view class="td td-type">
+          <text class="td-icon">{{item.icon}}</text>
+          <text class="td-name">{{item.name}}</text>
+        </view>
+        <text class="td td-count">{{item.count}}次</text>
+        <text class="td td-vol">{{item.totalMLL}}L</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 咖啡因卡片 -->
+  <view class="caffeine-card">
+    <view class="caffeine-header">
+      <text class="caffeine-icon">☕</text>
+      <text class="caffeine-title">咖啡因摄入</text>
+      <text class="caffeine-level">{{caffeineLevel}}</text>
+    </view>
+    <view class="caffeine-body">
+      <text class="caffeine-value">{{caffeineTotalMG}}</text>
+      <text class="caffeine-unit">mg</text>
+    </view>
+    <text class="caffeine-tip">统计来源：咖啡、茶水、奶茶、可乐</text>
+    <view class="caffeine-bar">
+      <view class="caffeine-bar-fill" style="width: {{caffeineBarWidth}}%; background: {{caffeineBarBg}}"></view>
+    </view>
+    <view class="caffeine-scale">
+      <text>0</text>
+      <text>200</text>
+      <text>400mg</text>
+    </view>
+  </view>
+
+  <view class="empty-stats" wx:if="{{drinkTypeTable.length === 0}}">
+    <text class="empty-stats-icon">📭</text>
+    <text class="empty-stats-text">这段时间还没有喝水记录哦~</text>
+  </view>
+</view>
+
+<!-- 底部占位 -->
+<view style="height: 220rpx;"></view>
+
+<!-- ============ 底部导航栏 ============ -->
+<view class="bottom-nav">
+  <view class="nav-item {{currentView === 'record' ? 'nav-active' : ''}}" bindtap="switchView" data-view="record">
+    <text class="nav-icon">📊</text>
+    <text class="nav-label">记录</text>
+  </view>
+  <view class="nav-item nav-center" bindtap="addWaterAction">
+    <view class="nav-center-btn">
+      <text class="nav-center-icon">💧</text>
+    </view>
+    <text class="nav-center-label">记录喝水</text>
+  </view>
+  <view class="nav-item {{currentView === 'stats' ? 'nav-active' : ''}}" bindtap="switchView" data-view="stats">
+    <text class="nav-icon">📈</text>
+    <text class="nav-label">统计</text>
+  </view>
+</view>
+</view>
+
+<!-- ============ 添加/编辑弹窗 ============ -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+<view class="modal-container" wx:if="{{showModal}}">
+<view class="modal-header">
+  <text class="modal-title">{{isEdit ? '编辑记录' : '添加记录'}}</text>
+  <view class="modal-close" bindtap="closeModal">✕</view>
+</view>
+<view class="modal-body">
+  <view class="form-group">
+    <text class="form-label">选择饮品</text>
+    <view class="drink-grid">
+      <view class="drink-item {{selectedDrink === item.type ? 'drink-active' : ''}}"
+            wx:for="{{drinkList}}" wx:key="type" bindtap="selectDrink" data-type="{{item.type}}">
+        <text class="drink-icon">{{item.icon}}</text>
+        <text class="drink-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="form-group">
+    <text class="form-label">水量 (ml)</text>
+    <view class="amount-control">
+      <view class="amount-btn" bindtap="changeAmount" data-delta="-50">-50</view>
+      <view class="amount-btn" bindtap="changeAmount" data-delta="-10">-10</view>
+      <input class="amount-input" type="number" value="{{tempML}}" bindinput="onAmountInput" />
+      <view class="amount-btn" bindtap="changeAmount" data-delta="10">+10</view>
+      <view class="amount-btn" bindtap="changeAmount" data-delta="50">+50</view>
+    </view>
+  </view>
+  <view class="form-group">
+    <text class="form-label">快捷选择</text>
+    <view class="quick-amounts">
+      <view class="quick-amount" wx:for="{{cupList}}" wx:key="ml" bindtap="setQuickAmount" data-ml="{{item.ml}}">
+        <text class="quick-amount-icon">{{item.icon}}</text>
+        <text class="quick-amount-ml">{{item.ml}}ml</text>
+      </view>
+    </view>
+  </view>
+</view>
+<view class="modal-footer">
+  <view class="modal-btn cancel-btn" bindtap="closeModal">取消</view>
+  <view class="modal-btn confirm-btn" bindtap="saveRecord">保存</view>
+</view>
+</view>
+
+<!-- ============ 删除确认弹窗 ============ -->
+<view class="modal-mask del-mask" wx:if="{{showDelModal}}" bindtap="closeDelModal"></view>
+<view class="del-modal" wx:if="{{showDelModal}}">
+<text class="del-emoji">🥺</text>
+<text class="del-title">要删掉这条记录吗？</text>
+<view class="del-preview">
+  <text class="del-preview-time">{{deleteRecord.time}}</text>
+  <text class="del-preview-ml">{{deleteRecord.ml}}ml</text>
+  <text class="del-preview-name">{{deleteRecord.name}}</text>
+</view>
+<text class="del-desc">删了就没啦，数据不可以恢复哦~</text>
+<view class="del-btns">
+  <view class="del-btn del-btn-cancel" bindtap="closeDelModal">再想想</view>
+  <view class="del-btn del-btn-confirm" bindtap="confirmDelete">删掉啦</view>
+</view>
+</view>
+
+<!-- ============ 目标修改弹窗 ============ -->
+<view class="modal-mask" wx:if="{{showTargetModal}}" bindtap="closeTargetModal"></view>
+<view class="modal-container target-modal" wx:if="{{showTargetModal}}">
+<view class="modal-header">
+  <text class="modal-title">修改喝水目标</text>
+  <view class="modal-close" bindtap="closeTargetModal">✕</view>
+</view>
+<view class="modal-body">
+  <view class="form-group">
+    <text class="form-label">每日目标 (ml)</text>
+    <input class="target-input" type="number" value="{{tempTarget}}" bindinput="onTargetInput" />
+  </view>
+</view>
+<view class="modal-footer">
+  <view class="modal-btn cancel-btn" bindtap="closeTargetModal">取消</view>
+  <view class="modal-btn confirm-btn" bindtap="saveTarget">保存</view>
+</view>
+</view>
+
+<!-- ========== 日期选择器弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showDatePicker}}" bindtap="closeDatePicker"></view>
+<view class="picker-modal" wx:if="{{showDatePicker}}">
+  <view class="picker-header">
+    <text class="picker-title">📅 选择日期</text>
+    <view class="modal-close" bindtap="closeDatePicker">✕</view>
+  </view>
+  <view class="picker-nav">
+    <view class="picker-nav-btn" bindtap="pickerPrevMonth">
+      <view class="picker-arrow picker-arrow-left"></view>
+    </view>
+    <text class="picker-nav-title">{{pickerYear}}年{{pickerMonth}}月</text>
+    <view class="picker-nav-btn" bindtap="pickerNextMonth">
+      <view class="picker-arrow picker-arrow-right"></view>
+    </view>
+  </view>
+  <view class="picker-weekdays">
+    <text class="picker-weekday" wx:for="{{weekDays}}" wx:key="*this">{{item}}</text>
+  </view>
+  <view class="picker-days">
+    <view class="picker-day {{item.empty ? 'picker-empty' : ''}} {{item.isToday ? 'picker-today' : ''}} {{item.isSelected ? 'picker-selected' : ''}} {{item.isFuture ? 'picker-future' : ''}}"
+          wx:for="{{pickerDays}}" wx:key="dateStr"
+          bindtap="selectPickerDay" data-date="{{item.dateStr}}">
+      <text>{{item.day}}</text>
+    </view>
+  </view>
+</view>
+

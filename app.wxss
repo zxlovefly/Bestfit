@@ -1,0 +1,85 @@
+/* ========== 全局变量 & 基础 ========== */
+page {
+  --bg: #FFF8F0;
+  --surface: #ffffff;
+  --pink: #FFB4C2;
+  --pink-deep: #FF8FAB;
+  --mint: #B5EAD7;
+  --coral: #FF6B6B;
+  --lavender: #C7CEEA;
+  --lavender-deep: #A78BFA;
+  --text-primary: #2D2B41;
+  --text-secondary: #6B6880;
+  --text-muted: #A8A5B8;
+  --shadow-sm: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  --shadow-md: 0 4rpx 20rpx rgba(0,0,0,0.06);
+  --radius-sm: 12rpx;
+  --radius-md: 18rpx;
+  --radius-lg: 24rpx;
+  --radius-xl: 32rpx;
+  --radius-full: 50%;
+
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--text-primary);
+  /* 不设置背景，各页面自行控制 */
+}
+
+/* 全局按钮 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 56rpx;
+  border-radius: var(--radius-xl);
+  font-size: 30rpx;
+  font-weight: 800;
+  border: none;
+}
+.btn-primary { background: linear-gradient(135deg, var(--pink), var(--pink-deep)); color: #fff; }
+.btn-outline { background: transparent; border: 3rpx solid var(--pink); color: var(--pink-deep); }
+.btn-secondary { background: var(--mint); color: #0d9488; }
+
+/* 全局卡片 */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 40rpx;
+  box-shadow: var(--shadow-sm);
+}
+.section-title {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 2rpx;
+  margin-bottom: 24rpx;
+}
+.tag {
+  display: inline-block;
+  padding: 8rpx 24rpx;
+  border-radius: 40rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.tag-pink { background: #fff0f3; color: var(--pink-deep); }
+.tag-mint { background: #ecfdf5; color: #0d9488; }
+.tag-lavender { background: #f5f3ff; color: var(--lavender-deep); }
+
+/* 进度条 */
+.progress-bar {
+  width: 100%;
+  height: 16rpx;
+  background: #F0EDF5;
+  border-radius: 10rpx;
+}
+.progress-bar .fill {
+  height: 100%;
+  border-radius: 10rpx;
+  background: linear-gradient(90deg, var(--pink), var(--pink-deep));
+}
+
+/* 强制隐藏原生TabBar（无效，但保留无害） */
+.wx-tabbar {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+}

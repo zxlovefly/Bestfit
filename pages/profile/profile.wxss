@@ -1,0 +1,242 @@
+/* pages/profile/profile.wxss */
+
+/* ---- Variables (可在 app.wxss :root 中统一定义) ---- */
+.page-scroll {
+  height: 100vh;
+  background: #FFF8F0;
+}
+
+.profile-wrap {
+  padding: 0 32rpx;
+}
+
+/* ============ Header ============ */
+.profile-header {
+  text-align: center;
+  padding: 80rpx 0 40rpx;
+}
+.header-icon {
+  font-size: 72rpx;
+  margin-bottom: 12rpx;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12rpx); }
+}
+.profile-header .title {
+  display: block;
+  font-size: 46rpx;
+  font-weight: 900;
+  color: #2D2A32;
+  letter-spacing: 2rpx;
+}
+.profile-header .desc {
+  display: block;
+  font-size: 26rpx;
+  color: #A09CAA;
+  margin-top: 8rpx;
+}
+
+/* ============ Cards ============ */
+.card {
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  padding: 36rpx 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(80, 60, 100, 0.05);
+}
+.card-title {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #2D2A32;
+  margin-bottom: 28rpx;
+  display: block;
+}
+
+/* ---- Fields ---- */
+.card-row {
+  display: flex;
+  gap: 20rpx;
+}
+.flex-1 { flex: 1; }
+.field { margin-bottom: 0; }
+.field-label {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #A09CAA;
+  margin-bottom: 14rpx;
+  display: block;
+}
+.field-input {
+  width: 100%;
+  padding: 22rpx 28rpx;
+  background: #FBF9FD;
+  border: 2rpx solid #F0EDF5;
+  border-radius: 18rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2D2A32;
+}
+.divider {
+  height: 2rpx;
+  background: #F4F1F8;
+  margin: 28rpx 0;
+}
+
+/* ---- Gender ---- */
+.gender-row {
+  display: flex;
+  gap: 20rpx;
+}
+.gender-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 24rpx 0;
+  border-radius: 20rpx;
+  border: 3rpx solid #F0EDF5;
+  background: #FBF9FD;
+  transition: all 0.25s ease;
+}
+.g-icon { font-size: 40rpx; }
+.g-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #5A5660;
+}
+.sel-gf {
+  border-color: #FF8DA1;
+  background: #FFF0F3;
+}
+.sel-gf .g-text { color: #E8496A; }
+.sel-gm {
+  border-color: #7EB8FF;
+  background: #F0F6FF;
+}
+.sel-gm .g-text { color: #3B8CFF; }
+
+/* ---- Metrics ---- */
+.metrics-grid {
+  display: flex;
+  gap: 16rpx;
+}
+.metric-box {
+  flex: 1;
+  text-align: center;
+  background: #FBF9FD;
+  border-radius: 20rpx;
+  padding: 28rpx 8rpx 20rpx;
+  border: 2rpx solid #F0EDF5;
+}
+.metric-input {
+  text-align: center;
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #2D2A32;
+  width: 100%;
+}
+.metric-unit {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #A09CAA;
+  margin-top: 8rpx;
+}
+
+/* ---- Option Grid (2x2) ---- */
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+}
+.opt-item {
+  background: #FBF9FD;
+  border: 3rpx solid #F0EDF5;
+  border-radius: 20rpx;
+  padding: 28rpx 16rpx 24rpx;
+  text-align: center;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.opt-item::after {
+  content: '✓';
+  position: absolute;
+  top: 10rpx;
+  right: 14rpx;
+  font-size: 22rpx;
+  color: transparent;
+  font-weight: 900;
+  transition: color 0.25s ease;
+}
+.opt-icon {
+  font-size: 48rpx;
+  display: block;
+  margin-bottom: 10rpx;
+}
+.opt-label {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #2D2A32;
+}
+.opt-hint {
+  display: block;
+  font-size: 20rpx;
+  color: #B0ACB8;
+  margin-top: 4rpx;
+}
+
+/* Selected states */
+.opt-sel-pink {
+  border-color: #FF8DA1;
+  background: #FFF0F3;
+}
+.opt-sel-pink::after { color: #E8496A; }
+
+.opt-sel-green {
+  border-color: #6DD4A0;
+  background: #F0FFF6;
+}
+.opt-sel-green::after { color: #2AAD6A; }
+
+.opt-sel-blue {
+  border-color: #7EB8FF;
+  background: #F0F6FF;
+}
+.opt-sel-blue::after { color: #3B8CFF; }
+
+.opt-sel-purple {
+  border-color: #B9A0FF;
+  background: #F5F0FF;
+}
+.opt-sel-purple::after { color: #8B6AFF; }
+
+/* ============ Save Button ============ */
+.btn-area {
+  margin-top: 16rpx;
+  padding: 0 8rpx;
+}
+.btn-save {
+  width: 100%;
+  padding: 30rpx 0;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #FF8DA1 0%, #FFB88C 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 800;
+  letter-spacing: 4rpx;
+  border: none;
+  box-shadow: 0 8rpx 32rpx rgba(255, 141, 161, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-save::after { border: none; }
+.btn-save:active {
+  transform: scale(0.97);
+  box-shadow: 0 4rpx 16rpx rgba(255, 141, 161, 0.25);
+}
+
+.footer-space { height: 80rpx; }

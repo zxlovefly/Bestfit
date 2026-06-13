@@ -1,0 +1,26 @@
+<view class="log-period-wrap">
+  <view class="head">
+    <text class="back" bindtap="back">‹</text>
+    <text class="title">🌸 经期追踪（选填）</text>
+  </view>
+  <view class="desc-text">
+    记录后智能预测下次经期，并调整饮食 ❤
+  </view>
+
+  <view class="form-box">
+    <view class="form-group">
+      <text class="label">上次经期开始</text>
+      <picker mode="date" value="{{startDate}}" bindchange="setStart">
+        <view class="input">{{startDate}}</view>
+      </picker>
+    </view>
+    <view class="form-group">
+      <text class="label">周期天数</text>
+      <input type="number" value="{{cycle}}" bindinput="setCycle"/>
+    </view>
+    <view class="nav-btns row">
+      <button class="btn btn-outline" bindtap="back">← 上一步</button>
+      <button class="btn btn-primary" bindtap="submit">完成设置 🎉</button>
+    </view>
+  </view>
+</view>

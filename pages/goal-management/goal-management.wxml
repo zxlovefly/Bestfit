@@ -1,0 +1,247 @@
+<view class="page">
+
+<!-- ======== Step 1 ======== -->
+<view class="setup-mask" wx:if="{{setupStep === 1}}">
+  <view class="setup-card">
+    <view class="center-icon-wrap"><text class="big-icon">🎯</text></view>
+    <text class="setup-title">你的目标是什么？</text>
+    <text class="setup-sub">选择最适合你的方向</text>
+    <view class="goal-grid">
+      <view class="ggi {{selectedGoalType==='lose'?'active':''}}" data-type="lose" bindtap="selectGoalType">
+        <view class="center-icon-wrap"><text class="med-icon">🔥</text></view>
+        <text class="ggi-name">减脂减重</text>
+        <text class="ggi-desc">降低体重与体脂率</text>
+      </view>
+      <view class="ggi {{selectedGoalType==='gain'?'active':''}}" data-type="gain" bindtap="selectGoalType">
+        <view class="center-icon-wrap"><text class="med-icon">💪</text></view>
+        <text class="ggi-name">增肌增重</text>
+        <text class="ggi-desc">增加肌肉与体重</text>
+      </view>
+      <view class="ggi {{selectedGoalType==='tone'?'active':''}}" data-type="tone" bindtap="selectGoalType">
+        <view class="center-icon-wrap"><text class="med-icon">✨</text></view>
+        <text class="ggi-name">塑形紧致</text>
+        <text class="ggi-desc">改善体型与线条</text>
+      </view>
+      <view class="ggi {{selectedGoalType==='maintain'?'active':''}}" data-type="maintain" bindtap="selectGoalType">
+        <view class="center-icon-wrap"><text class="med-icon">⚖️</text></view>
+        <text class="ggi-name">维持体重</text>
+        <text class="ggi-desc">保持健康与稳定</text>
+      </view>
+    </view>
+    <view class="btn-primary {{selectedGoalType?'':'disabled'}}" bindtap="toStep2">下一步</view>
+  </view>
+</view>
+
+<!-- ======== Step 2 ======== -->
+<view class="setup-mask" wx:if="{{setupStep === 2}}">
+  <view class="setup-card">
+    <view class="center-icon-wrap"><text class="big-icon">{{goalTypeEmoji}}</text></view>
+    <text class="setup-title">{{goalTypeTitle}}</text>
+    <text class="setup-sub">{{goalTypeSub}}</text>
+    <view class="sf-field">
+      <text class="sf-label">当前体重</text>
+      <view class="sf-row"><view class="sf-btn" data-d="-0.1" data-f="sw" catchtap="adjSetup">−</view><input class="sf-input" type="digit" value="{{setupWeight}}" data-f="sw" bindinput="onSetupInput" /><view class="sf-btn" data-d="0.1" data-f="sw" catchtap="adjSetup">+</view></view>
+      <text class="sf-unit">kg</text>
+    </view>
+    <view class="sf-field" wx:if="{{selectedGoalType!=='maintain'}}">
+      <text class="sf-label">目标体重</text>
+      <view class="sf-row"><view class="sf-btn" data-d="-0.1" data-f="st" catchtap="adjSetup">−</view><input class="sf-input" type="digit" value="{{setupTarget}}" data-f="st" bindinput="onSetupInput" /><view class="sf-btn" data-d="0.1" data-f="st" catchtap="adjSetup">+</view></view>
+      <text class="sf-unit">kg</text>
+    </view>
+    <view class="tip-box" wx:if="{{setupTip}}"><text>💡 {{setupTip}}</text></view>
+    <view class="btn-row"><view class="btn-secondary" bindtap="toStep1">上一步</view><view class="btn-primary flex1" bindtap="confirmSetup">开始追踪</view></view>
+  </view>
+</view>
+
+<!-- ======== 主面板 ======== -->
+<view class="dashboard" wx:if="{{setupStep===0}}">
+  <view class="top-bar">
+    <view class="tag-pill"><view class="center-icon-wrap sm"><text class="sm-icon">{{goalTypeEmoji}}</text></view><text class="tag-text">{{goalTypeShort}}</text></view>
+    <view class="link-text" bindtap="onResetGoal">更换目标</view>
+  </view>
+
+  <view class="hero hero-{{selectedGoalType}}">
+    <view class="hero-circle c1"></view><view class="hero-circle c2"></view>
+    <text class="hero-label">{{heroLabel}}</text>
+    <view class="hero-w-row"><text class="hero-w">{{currentWeight}}</text><text class="hero-unit">kg</text>
+      <view class="trend-badge {{latestTrend}}" wx:if="{{hasEnoughRecords}}"><text>{{latestTrend==='down'?'↓':latestTrend==='up'?'↑':'→'}}{{trendDiff}}</text></view>
+    </view>
+    <view class="hero-cards">
+      <view class="hc"><text class="hc-n">{{initialWeight}}</text><text class="hc-l">初始体重</text></view>
+      <view class="hc-div"></view>
+      <view class="hc"><text class="hc-n">{{targetWeight}}</text><text class="hc-l">{{selectedGoalType==='maintain'?'保持区间':'目标体重'}}</text></view>
+      <view class="hc-div"></view>
+      <view class="hc">
+        <text class="hc-n" wx:if="{{selectedGoalType!=='maintain'}}">{{changeAmount}}</text><text class="hc-n" wx:else>{{waveRange}}</text>
+        <text class="hc-l" wx:if="{{selectedGoalType==='lose'}}">还需减重</text><text class="hc-l" wx:elif="{{selectedGoalType==='gain'}}">还需增重</text><text class="hc-l" wx:elif="{{selectedGoalType==='tone'}}">还需调整</text><text class="hc-l" wx:else>当前波动</text>
+      </view>
+    </view>
+    <view class="prog-wrap" wx:if="{{selectedGoalType!=='maintain'}}">
+      <view class="prog-bar"><view class="prog-fill" style="width:{{progressPercent}}%"></view></view>
+      <view class="prog-info"><text>已完成 {{progressPercent}}%</text><text wx:if="{{daysToGoal>0}}">预计还需 {{daysToGoal}} 天</text><text wx:elif="{{progressPercent>=100}}" class="reached">🎉 已达成！</text></view>
+    </view>
+    <view class="maintain-row" wx:if="{{selectedGoalType==='maintain'}}">
+      <view class="mr-item"><text class="mr-val">{{maintainDays}}</text><text class="mr-l">已维持天数</text></view>
+      <view class="mr-item"><text class="mr-val {{maintainOk?'good':'warn'}}">{{maintainStatus}}</text><text class="mr-l">体重状态</text></view>
+      <view class="mr-item"><text class="mr-val">{{avgWeight}}</text><text class="mr-l">近7日均值</text></view>
+    </view>
+  </view>
+
+  <!-- 趋势图 -->
+  <view class="sec s1">
+    <view class="sec-head"><text class="sec-title">体重趋势</text>
+      <view class="range-tabs"><view class="rt {{chartRange===7?'on':''}}" data-range="7" bindtap="setRange">7天</view><view class="rt {{chartRange===14?'on':''}}" data-range="14" bindtap="setRange">14天</view><view class="rt {{chartRange===30?'on':''}}" data-range="30" bindtap="setRange">30天</view></view>
+    </view>
+    <!-- 关键修复：canvas 仅在无弹窗时渲染，避免原生层穿透遮罩 -->
+    <view class="chart-box">
+      <canvas type="2d" id="weightChart" class="w-chart" wx:if="{{hasEnoughRecords && !_anyModalOpen}}"></canvas>
+      <view class="chart-empty" wx:if="{{!hasEnoughRecords}}"><text>📈</text><text class="ce-t">记录更多数据后显示趋势</text></view>
+    </view>
+  </view>
+
+  <!-- 记录按钮 -->
+  <view class="record-btn" bindtap="showRecord"><text class="rb-emoji">📝</text><text class="rb-text">记录体重</text></view>
+
+  <!-- 身体数据 -->
+  <view class="sec s-extra">
+    <view class="sec-head"><text class="sec-title">身体数据</text><text class="sec-hint">点击记录</text></view>
+    <view class="body-card">
+      <view class="bd-row" bindtap="showBodyInput" data-field="bodyFat"><view class="bd-l"><text class="bd-ic">📉</text><text class="bd-name">体脂率</text></view><view class="bd-r"><text class="bd-val">{{bodyFat||'--'}}</text><text class="bd-u">%</text><text class="bd-ar">›</text></view></view>
+      <view class="bd-div"></view>
+      <view class="bd-row" bindtap="showBodyInput" data-field="muscleMass"><view class="bd-l"><text class="bd-ic">🦾</text><text class="bd-name">肌肉量</text></view><view class="bd-r"><text class="bd-val">{{muscleMass||'--'}}</text><text class="bd-u">kg</text><text class="bd-ar">›</text></view></view>
+      <view class="bd-div"></view>
+      <view class="bd-row" bindtap="showBodyInput" data-field="waistline"><view class="bd-l"><text class="bd-ic">📐</text><text class="bd-name">腰围</text></view><view class="bd-r"><text class="bd-val">{{waistline||'--'}}</text><text class="bd-u">cm</text><text class="bd-ar">›</text></view></view>
+      <view class="bd-div"></view>
+      <view class="bd-row"><view class="bd-l"><text class="bd-ic">🧮</text><text class="bd-name">BMI</text></view><view class="bd-r"><text class="bd-val">{{bmi||'--'}}</text><text class="bd-u"></text><text class="bd-ar hide"></text></view></view>
+    </view>
+  </view>
+
+  <!-- 阶段目标 -->
+  <view class="sec s2">
+    <text class="sec-title">阶段目标</text>
+    <view class="tl-card">
+      <view class="tl-item {{item.reached?'done':''}}" wx:for="{{milestones}}" wx:key="index">
+        <view class="tl-dot"></view><view class="tl-line" wx:if="{{index<milestones.length-1}}"></view>
+        <view class="tl-body"><view class="tl-row"><text class="tl-date">{{item.dateLabel}}</text><text class="tl-st">{{item.reached?'✓ 已达成':'待达成'}}</text></view><text class="tl-desc">{{item.desc}}</text></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 推荐 -->
+  <view class="sec s3">
+    <text class="sec-title">为你推荐</text>
+    <view class="plan-card" wx:for="{{plans}}" wx:key="id" bindtap="openPlanDetail" data-id="{{item.id}}">
+      <view class="pl-top"><view class="pl-badge {{item.badgeClass}}">{{item.badge}}</view><text class="pl-name">{{item.name}}</text></view>
+      <view class="pl-grid" wx:if="{{item.stats}}"><view class="pl-gi" wx:for="{{item.stats}}" wx:for-item="st" wx:key="label"><text class="pg-v">{{st.val}}</text><text class="pg-l">{{st.label}}</text></view></view>
+      <text class="pl-desc">{{item.desc}}</text>
+      <text class="pl-cta">了解更多 →</text>
+    </view>
+  </view>
+
+  <!-- CTA -->
+  <view class="cta-sec">
+    <view class="cta-btn cta-{{selectedGoalType}}" bindtap="goStats"><text class="cta-text">{{ctaText}}</text></view>
+    <text class="cta-sub">{{ctaSub}}</text>
+  </view>
+  <view class="spacer"></view>
+</view>
+
+<!-- ======== 记录体重弹窗 ======== -->
+<view class="mask" wx:if="{{showRecord}}" catchtap="hideRecord">
+  <view class="modal" catchtap="preventBubble">
+    <view class="handle"></view>
+    <text class="modal-title">📅 记录体重</text>
+    <view class="date-display"><text class="dd-text">{{recordDateLabel}}</text></view>
+    <view class="cal-wrap">
+      <view class="cal-nav">
+        <view class="cal-arrow" catchtap="prevMonth"><text>‹</text></view>
+        <text class="cal-month">{{calYear}}年{{calMonth}}月</text>
+        <view class="cal-arrow" catchtap="nextMonth"><text>›</text></view>
+      </view>
+      <view class="cal-header"><text class="cal-wh" wx:for="{{weekdays}}" wx:key="*this">{{item}}</text></view>
+      <view class="cal-week" wx:for="{{calWeeks}}" wx:key="index">
+        <view class="cal-cell {{day.empty?'empty':''}} {{day.isToday?'today':''}} {{day.dateStr===selectedRecordDate?'sel':''}} {{day.isFuture?'future':''}}" wx:for="{{item}}" wx:for-item="day" wx:key="dateStr" data-date="{{day.dateStr}}" data-future="{{day.isFuture}}" catchtap="selectCalDate">
+          <text wx:if="{{!day.empty}}">{{day.day}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="weight-input-area">
+      <view class="wi-adj" data-d="-0.1" catchtap="adjRecordWeight"><text>−</text></view>
+      <view class="wi-display" bindtap="focusRecordInput"><text class="wi-val">{{recordWeight}}</text><text class="wi-unit">kg</text></view>
+      <view class="wi-adj" data-d="0.1" catchtap="adjRecordWeight"><text>+</text></view>
+    </view>
+    <input class="hidden-input" type="digit" value="{{recordWeight}}" bindinput="onRecordWeightInput" bindconfirm="confirmRecord" bindblur="blurRecordInput" focus="{{recordInputFocused}}" />
+    <view class="modal-btns"><view class="mb cancel" catchtap="hideRecord">取消</view><view class="mb confirm" catchtap="confirmRecord">确定记录</view></view>
+  </view>
+</view>
+
+<!-- ======== 身体数据弹窗 ======== -->
+<view class="mask" wx:if="{{showBodyModal}}" catchtap="hideBodyModal">
+  <view class="modal" catchtap="preventBubble">
+    <view class="handle"></view>
+    <text class="modal-title">{{bodyModalTitle}}</text>
+    <view class="weight-input-area">
+      <view class="wi-adj" data-d="-{{bodyStep}}" catchtap="adjBody"><text>−</text></view>
+      <view class="wi-display"><input class="body-val-input" type="digit" value="{{bodyInputVal}}" bindinput="onBodyInput" focus="{{bodyInputFocused}}" /><text class="wi-unit">{{bodyUnit}}</text></view>
+      <view class="wi-adj" data-d="{{bodyStep}}" catchtap="adjBody"><text>+</text></view>
+    </view>
+    <view class="modal-btns"><view class="mb cancel" catchtap="hideBodyModal">取消</view><view class="mb confirm" catchtap="confirmBody">确定</view></view>
+  </view>
+</view>
+
+<!-- ======== 更换目标弹窗 ======== -->
+<view class="mask" wx:if="{{showGoalModal}}" catchtap="closeGoalModal">
+  <view class="goal-modal" catchtap="preventBubble">
+    <view class="gm-deco"></view>
+    <view class="center-icon-wrap"><text class="big-icon">🎯</text></view>
+    <text class="gm-title">更换目标</text>
+    <text class="gm-sub">选择一个最适合你的方向</text>
+    <view class="goal-grid">
+      <view class="ggi {{goalModalType==='lose'?'active':''}}" data-type="lose" bindtap="selectGoalModalType">
+        <view class="center-icon-wrap"><text class="med-icon">🔥</text></view>
+        <text class="ggi-name">减脂减重</text><text class="ggi-desc">降低体脂率</text>
+      </view>
+      <view class="ggi {{goalModalType==='gain'?'active':''}}" data-type="gain" bindtap="selectGoalModalType">
+        <view class="center-icon-wrap"><text class="med-icon">💪</text></view>
+        <text class="ggi-name">增肌增重</text><text class="ggi-desc">增加肌肉量</text>
+      </view>
+      <view class="ggi {{goalModalType==='tone'?'active':''}}" data-type="tone" bindtap="selectGoalModalType">
+        <view class="center-icon-wrap"><text class="med-icon">✨</text></view>
+        <text class="ggi-name">塑形紧致</text><text class="ggi-desc">改善线条</text>
+      </view>
+      <view class="ggi {{goalModalType==='maintain'?'active':''}}" data-type="maintain" bindtap="selectGoalModalType">
+        <view class="center-icon-wrap"><text class="med-icon">⚖️</text></view>
+        <text class="ggi-name">维持体重</text><text class="ggi-desc">保持稳定</text>
+      </view>
+    </view>
+    <view class="btn-row"><view class="btn-secondary" catchtap="closeGoalModal">再想想</view><view class="btn-primary flex1 {{goalModalType?'':'disabled'}}" catchtap="confirmGoalChange">确定更换</view></view>
+  </view>
+</view>
+
+<!-- ======== 方案详情（已修复滚动问题） ======== -->
+<view class="detail-mask {{showDetail?'show':''}}" wx:if="{{showDetail}}" catchtap="closeDetail">
+  <view class="detail-panel" catchtap="preventBubble">
+    <view class="dh theme-{{detailData.theme}}">
+      <view class="dh-c1"></view><view class="dh-c2"></view>
+      <view class="dh-close" catchtap="closeDetail"><text>✕</text></view>
+      <view class="center-icon-wrap lg"><text class="xl-icon">{{detailData.icon}}</text></view>
+      <text class="dh-title">{{detailData.title}}</text>
+      <text class="dh-sub">{{detailData.subtitle}}</text>
+    </view>
+    <!-- ✅ 修复：添加enhanced和show-scrollbar，优化滚动体验 -->
+    <scroll-view scroll-y class="detail-sv" enhanced="{{true}}" show-scrollbar="{{false}}">
+      <view class="detail-body">
+        <view class="ds-card" wx:for="{{detailData.sections}}" wx:key="heading">
+          <view class="ds-bar theme-{{detailData.theme}}"></view>
+          <text class="ds-heading">{{item.heading}}</text>
+          <text class="ds-text" wx:if="{{item.type==='text'}}">{{item.content}}</text>
+          <view wx:if="{{item.type==='list'}}"><view class="ds-li" wx:for="{{item.items}}" wx:for-item="li" wx:key="*this"><view class="ds-dot theme-{{detailData.theme}}"></view><text class="ds-li-t">{{li}}</text></view></view>
+          <view wx:if="{{item.type==='steps'}}"><view class="ds-step" wx:for="{{item.items}}" wx:for-item="step" wx:key="*this"><view class="ds-num theme-{{detailData.theme}}">{{index+1}}</view><text class="ds-step-t">{{step}}</text></view></view>
+        </view>
+      </view>
+      <view class="spacer-sm"></view>
+    </scroll-view>
+  </view>
+</view>
+
+</view>

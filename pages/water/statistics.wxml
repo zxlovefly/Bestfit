@@ -1,0 +1,49 @@
+<view class="statistics-page">
+  <!-- 顶部切换标签 -->
+  <view class="tab-bar">
+    <view class="tab-item {{tabIndex === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+      本周统计
+    </view>
+    <view class="tab-item {{tabIndex === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+      本月统计
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-card">
+    <view class="stats-grid">
+      <view class="stats-item">
+        <text class="stats-value">{{tabIndex === 0 ? totalWeekML : totalMonthML}}</text>
+        <text class="stats-label">总饮水量(ml)</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{tabIndex === 0 ? avgWeekML : avgMonthML}}</text>
+        <text class="stats-label">日均饮水量(ml)</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{tabIndex === 0 ? weekCompleteDays : monthCompleteDays}}</text>
+        <text class="stats-label">完成天数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-value">{{tabIndex === 0 ? weekCompleteRate : monthCompleteRate}}%</text>
+        <text class="stats-label">完成率</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 趋势图 -->
+  <view class="chart-card">
+    <view class="chart-title">📊 饮水量趋势</view>
+    <view class="chart-container">
+      <view class="chart-bar" wx:for="{{tabIndex === 0 ? weekData : monthData}}" wx:key="date">
+        <view class="bar-wrap">
+          <view class="bar-fill {{item.isComplete ? 'complete' : ''}}" style="height: {{item.percent}}%;"></view>
+        </view>
+        <text class="bar-date">{{item.date}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部安全区 -->
+  <view style="height: 120rpx;"></view>
+</view>

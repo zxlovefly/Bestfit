@@ -1,0 +1,71 @@
+<scroll-view scroll-y class="me-wrap">
+  <view class="me-header">
+    <view class="avatar">😺<text class="badge">🌟</text></view>
+    <text class="name">小柠</text>
+    <text class="level">Lv.5 健康达人 · 🔥 连续打卡28天</text>
+  </view>
+
+  <view class="stat-box">
+    <view class="s-item">
+      <text class="val">28</text>
+      <text class="label">打卡天数</text>
+    </view>
+    <view class="s-item">
+      <text class="val">{{loseWeight}}</text>
+      <text class="label">减重 (kg)</text>
+    </view>
+    <view class="s-item">
+      <text class="val">{{completeRate}}%</text>
+      <text class="label">目标完成率</text>
+    </view>
+  </view>
+
+  <view class="pad">
+    <button class="weight-log-btn" bindtap="goWeightLog">📝 记录今日体重</button>
+  </view>
+
+  <view class="pad">
+    <view class="chart-card">
+      <text class="c-title">📈 体重趋势 (近4周)</text>
+      <view class="weight-chart">
+        <view wx:for="{{weightChartData}}" wx:key="index" class="w-bar" style="height:{{item}}%"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="pad" style="margin-top:32rpx">
+    <view class="chart-card">
+      <text class="c-title">🔥 本周热量摄入</text>
+      <view class="bar-chart">
+        <view class="b-col"><view class="b-bar" style="height:60%;background:var(--mint)"></view><text>一</text></view>
+        <view class="b-col"><view class="b-bar" style="height:75%;background:var(--mint)"></view><text>二</text></view>
+        <view class="b-col"><view class="b-bar" style="height:50%;background:var(--mint)"></view><text>三</text></view>
+        <view class="b-col"><view class="b-bar" style="height:70%;background:var(--pink)"></view><text style="color:var(--pink-deep)">四</text></view>
+        <view class="b-col"><view class="b-bar" style="height:5%;background:#eee"></view><text>五</text></view>
+        <view class="b-col"><view class="b-bar" style="height:5%;background:#eee"></view><text>六</text></view>
+        <view class="b-col"><view class="b-bar" style="height:5%;background:#eee"></view><text>日</text></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="pad" style="margin-top:40rpx">
+    <view class="menu-group">
+      <view class="menu-item">
+        <text class="icon">📋</text>
+        <text class="label">我的减脂方案</text>
+        <text class="badge tag-mint">当前方案</text>
+      </view>
+      <view class="menu-item" bindtap="goPeriod">
+        <text class="icon">🌸</text>
+        <text class="label">经期追踪</text>
+        <text class="badge tag-pink">{{periodDiff}}天后</text>
+      </view>
+      <view class="menu-item">
+        <text class="icon">📊</text>
+        <text class="label">完整健康报告</text>
+      </view>
+    </view>
+  </view>
+
+  <view style="height:120rpx"></view>
+</scroll-view>

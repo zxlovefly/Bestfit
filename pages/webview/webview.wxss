@@ -1,0 +1,24 @@
+.wv-page{min-height:100vh;background:linear-gradient(180deg,#FFF8F0,#FFF0F5)}
+.wv-error{display:flex;flex-direction:column;align-items:center;padding:120rpx 48rpx 60rpx;position:relative;min-height:100vh;box-sizing:border-box}
+.wv-deco{position:absolute;inset:0;pointer-events:none;z-index:0}
+.wv-sparkle{position:absolute;animation:wvSparkle 3s ease-in-out infinite}
+.ws1{top:15%;left:12%;font-size:28rpx}.ws2{top:10%;right:15%;font-size:24rpx;animation-delay:0.8s}.ws3{top:55%;left:8%;font-size:20rpx;animation-delay:1.5s}.ws4{top:60%;right:10%;font-size:22rpx;animation-delay:2.2s}
+@keyframes wvSparkle{0%,100%{opacity:0.2;transform:translateY(0) scale(1)}50%{opacity:1;transform:translateY(-12rpx) scale(1.2)}}
+.wv-blob{position:absolute;border-radius:50%;pointer-events:none;z-index:0}
+.wv-blob1{top:5%;right:-40rpx;width:260rpx;height:260rpx;background:radial-gradient(circle,rgba(255,180,194,0.2),transparent 70%)}
+.wv-blob2{bottom:10%;left:-30rpx;width:200rpx;height:200rpx;background:radial-gradient(circle,rgba(180,200,255,0.15),transparent 70%)}
+.wv-emoji{font-size:120rpx;position:relative;z-index:1;margin-bottom:20rpx;animation:wvBounce 2.5s ease-in-out infinite}
+@keyframes wvBounce{0%,100%{transform:translateY(0)}25%{transform:translateY(-16rpx) scale(1.06)}50%{transform:translateY(0)}75%{transform:translateY(-8rpx) scale(1.03)}}
+.wv-title{font-size:36rpx;font-weight:900;color:#2D2B41;position:relative;z-index:1;margin-bottom:14rpx;letter-spacing:1rpx}
+.wv-desc{font-size:26rpx;color:#A8A5B8;text-align:center;line-height:1.7;position:relative;z-index:1;margin-bottom:28rpx}
+.wv-link-box{background:linear-gradient(135deg,#F0F7FF,#FFF0F5);border:2rpx solid #E8EFF5;border-radius:20rpx;padding:18rpx 28rpx;margin-bottom:36rpx;position:relative;z-index:1;max-width:100%}
+.wv-link{font-size:22rpx;color:#6C8EEF;word-break:break-all;line-height:1.5}
+.wv-btns{display:flex;gap:20rpx;position:relative;z-index:1;width:100%}
+.wv-btn{flex:1;height:88rpx;border-radius:44rpx;display:flex;align-items:center;justify-content:center;font-size:28rpx;font-weight:700;transition:all 0.2s ease}
+.wv-btn:active{transform:scale(0.95)}
+.wv-back{background:#F5F3F7;color:#8B85A0}
+.wv-copy{background:linear-gradient(135deg,#FFB4C2,#FF8FAB);color:#fff;box-shadow:0 8rpx 24rpx rgba(255,143,171,0.3)}
+.wv-hearts{position:absolute;bottom:40rpx;left:0;right:0;display:flex;justify-content:center;gap:80rpx;pointer-events:none}
+.wv-heart{font-size:20rpx;animation:wvHeart 3s ease-in-out infinite}
+.wh1{animation-delay:0s}.wh2{animation-delay:1.5s}
+@keyframes wvHeart{0%,100%{opacity:0;transform:translateY(0) scale(0.6)}30%{opacity:0.7;transform:translateY(-20rpx) scale(1)}70%{opacity:0.4;transform:translateY(-50rpx) scale(0.8)}100%{opacity:0;transform:translateY(-80rpx) scale(0.3)}}

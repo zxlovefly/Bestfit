@@ -1,0 +1,28 @@
+{
+  "description": "BESTFit",
+  "packOptions": {
+    "ignore": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "preloadBackgroundData": false,
+    "minified": true,
+    "newFeature": false,
+    "autoAudits": false,
+    "condition": true,
+    "swc": true,
+    "disableSWC": false,
+    "libVersion": "2.32.3"
+  },
+  "compileType": "miniprogram",
+  "appid": "wx575da124de28507f",
+  "projectname": "better and stronger",
+  "condition": {},
+  "projectArchitecture": "multiPlatform",
+  "simulatorPluginLibVersion": {
+    "wxext14566970e7e9f62": "2.27.3"
+  }
+}

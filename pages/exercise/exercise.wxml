@@ -1,0 +1,191 @@
+<view class="page">
+
+<!-- 状态栏 -->
+<view style="height:{{statusBarH}}px"></view>
+
+<!-- ========== 头部 ========== -->
+<view class="header">
+  <view class="header-bg"></view>
+  <view class="header-inner">
+    <view class="nav-row">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <view class="nav-center">
+        <text class="header-title">运动记录</text>
+        <text class="header-desc">记录每一次挥洒汗水 ✨</text>
+      </view>
+      <view class="nav-placeholder"></view>
+    </view>
+    <!-- 周/月 切换 -->
+    <view class="mode-toggle">
+      <view class="mt-btn {{viewMode==='week'?'on':''}}" bindtap="switchMode" data-mode="week">
+        <text>本周</text>
+      </view>
+      <view class="mt-btn {{viewMode==='month'?'on':''}}" bindtap="switchMode" data-mode="month">
+        <text>本月</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- ========== 可滚动主体 ========== -->
+<scroll-view scroll-y class="body" enhanced show-scrollbar="{{false}}">
+
+  <!-- 周期导航 -->
+  <view class="period-nav">
+    <view class="pn-arrow" bindtap="prevPeriod"><text>‹</text></view>
+    <text class="pn-label">{{viewMode==='week'?weekLabel:monthLabel}}</text>
+    <view class="pn-arrow {{nextDisabled?'disabled':''}}" bindtap="nextPeriod"><text>›</text></view>
+  </view>
+
+  <!-- ===== AI 运动点评 ===== -->
+  <view class="ai-card">
+    <view class="ai-head">
+      <view class="ai-title-row">
+        <text class="ai-sparkle">✨</text>
+        <text class="ai-title">AI 运动点评</text>
+      </view>
+      <view class="ai-refresh" bindtap="refreshAI">
+        <text class="ai-refresh-icon">🔄</text>
+      </view>
+    </view>
+    <view wx:if="{{aiLoading}}" class="ai-loading">
+      <view class="ai-shimmer w80"></view>
+      <view class="ai-shimmer w95"></view>
+      <view class="ai-shimmer w55"></view>
+    </view>
+    <view wx:elif="{{aiText}}" class="ai-body">
+      <text class="ai-text">{{aiText}}</text>
+    </view>
+  </view>
+
+  <!-- 概览卡片 -->
+  <view class="cards">
+    <view class="card card-goal">
+      <text class="card-icon">🎯</text>
+      <text class="card-value">{{goalProgress}}<text class="card-unit">/{{goalTarget}}天</text></text>
+      <text class="card-label">目标达成</text>
+    </view>
+    <view class="card card-cal">
+      <text class="card-icon">🔥</text>
+      <text class="card-value">{{avgCal}}<text class="card-unit">kcal</text></text>
+      <text class="card-label">日均消耗</text>
+    </view>
+    <view class="card card-time">
+      <text class="card-icon">⏱️</text>
+      <text class="card-value">{{totalMin}}<text class="card-unit">min</text></text>
+      <text class="card-label">总运动时长</text>
+    </view>
+  </view>
+
+  <!-- ===== 周日期选择器 ===== -->
+  <block wx:if="{{viewMode==='week'}}">
+    <view class="week-row">
+      <view wx:for="{{weekDays}}" wx:key="fullDate"
+            class="week-day {{item.isActive?'active':''}} {{item.isToday?'today':''}}"
+            bindtap="tapDay" data-date="{{item.fullDate}}">
+        <text class="wd-label">{{item.label}}</text>
+        <text class="wd-date">{{item.date}}</text>
+        <view wx:if="{{item.hasRecord}}" class="wd-dot"></view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 月日历 ===== -->
+  <block wx:if="{{viewMode==='month'}}">
+    <view class="calendar">
+      <view class="cal-header">
+        <text wx:for="{{weekHeaders}}" wx:key="*this" class="cal-th">{{item}}</text>
+      </view>
+      <view class="cal-body">
+        <view wx:for="{{monthGrid}}" wx:key="fullDate"
+              class="cal-cell {{item.isCurrentMonth?'':'other'}} {{item.isToday?'today':''}} {{item.isActive?'active':''}}"
+              bindtap="tapDay" data-date="{{item.fullDate}}">
+          <text class="cal-num">{{item.date}}</text>
+          <view wx:if="{{item.hasRecord}}" class="cal-dot"></view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- ===== 当日运动分布 ===== -->
+  <view class="section-hd">
+    <text class="section-title">{{selectedLabel}} 运动分布</text>
+  </view>
+
+  <block wx:if="{{hasDailyData}}">
+    <view class="dist-summary">
+      共消耗 <text class="hl">{{dailyTotalCal}}</text> 千卡 · 运动 <text class="hl">{{dailyTotalMin}}</text> 分钟
+    </view>
+    <!-- ★ 时间功能：运动列表增加时间段显示 -->
+    <view class="dist-list">
+      <view wx:for="{{distribution}}" wx:key="name" class="dist-item">
+        <view class="di-head">
+          <text class="di-emoji">{{item.emoji}}</text>
+          <view class="di-name-wrap">
+            <text class="di-name">{{item.name}}</text>
+            <text wx:if="{{item.timeRange}}" class="di-time">{{item.timeRange}}</text>
+          </view>
+        </view>
+        <view class="di-track">
+          <view class="di-fill" style="width:{{item.pct}}%;background:{{item.color}}"></view>
+        </view>
+        <text class="di-val">{{item.cal}}<text class="di-unit">kcal</text></text>
+      </view>
+    </view>
+  </block>
+
+  <view wx:else class="empty-state">
+    <text class="es-emoji">🏃‍♀️</text>
+    <text class="es-text">这一天还没有运动记录</text>
+    <view class="es-btn" bindtap="goAddSport">+ 添加运动</view>
+  </view>
+
+  <!-- ===== 热量趋势 ===== -->
+  <view class="section-hd">
+    <text class="section-title">{{viewMode==='week'?'本周':'本月'}}热量趋势</text>
+  </view>
+  <view class="trend-card">
+    <scroll-view scroll-x class="trend-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="vbar-chart" style="width:{{trendChartWidth}}rpx">
+        <view wx:for="{{trendBars}}" wx:key="label" class="vbar-item" style="width:{{trendBarWidth}}rpx">
+          <text class="vb-val" wx:if="{{item.cal>0}}">{{item.cal}}</text>
+          <text class="vb-val empty" wx:else>-</text>
+          <view class="vb-col">
+            <view class="vb-fill cal-fill" style="height:{{item.calH}}%"></view>
+          </view>
+          <text class="vb-label">{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ===== 时长趋势 ===== -->
+  <view class="section-hd">
+    <text class="section-title">{{viewMode==='week'?'本周':'本月'}}时长趋势</text>
+  </view>
+  <view class="trend-card">
+    <scroll-view scroll-x class="trend-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="vbar-chart" style="width:{{trendChartWidth}}rpx">
+        <view wx:for="{{trendBars}}" wx:key="label" class="vbar-item" style="width:{{trendBarWidth}}rpx">
+          <text class="vb-val" wx:if="{{item.min>0}}">{{item.min}}</text>
+          <text class="vb-val empty" wx:else>-</text>
+          <view class="vb-col">
+            <view class="vb-fill min-fill" style="height:{{item.minH}}%"></view>
+          </view>
+          <text class="vb-label">{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部留白 -->
+  <view style="height:220rpx"></view>
+</scroll-view>
+
+<!-- 浮动添加按钮 -->
+<view class="fab" bindtap="goAddSport">
+  <text class="fab-plus">+</text>
+</view>
+</view>

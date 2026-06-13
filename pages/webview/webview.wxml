@@ -1,0 +1,22 @@
+<view class="wv-page">
+  <web-view wx:if="{{!loadError}}" src="{{url}}" binderror="onError"></web-view>
+  <view wx:if="{{loadError}}" class="wv-error">
+    <view class="wv-deco">
+      <text class="wv-sparkle ws1">✨</text>
+      <text class="wv-sparkle ws2">🌸</text>
+      <text class="wv-sparkle ws3">💫</text>
+      <text class="wv-sparkle ws4">⭐</text>
+    </view>
+    <view class="wv-blob wv-blob1"></view>
+    <view class="wv-blob wv-blob2"></view>
+    <text class="wv-emoji">🥺</text>
+    <text class="wv-title">哎呀，页面打不开~</text>
+    <text class="wv-desc">需要在小程序后台将此域名<br/>添加到业务域名白名单哦</text>
+    <view class="wv-link-box"><text class="wv-link">{{url}}</text></view>
+    <view class="wv-btns">
+      <view class="wv-btn wv-back" bindtap="goBack"><text>返回首页</text></view>
+      <view class="wv-btn wv-copy" bindtap="copyLink"><text>复制链接 🔗</text></view>
+    </view>
+    <view class="wv-hearts"><text class="wv-heart wh1">💗</text><text class="wv-heart wh2">💕</text></view>
+  </view>
+</view>

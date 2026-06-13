@@ -1,0 +1,370 @@
+<scroll-view scroll-y class="page-wrap" style="height:100vh">
+
+<!-- ========== 月份导航 ========== -->
+<view class="month-nav">
+  <view class="mn-center">
+    <view class="mn-arrow" bindtap="prevMonth">
+      <view class="arr arr-l"></view>
+    </view>
+    <view class="picker-row" bindtap="openMonthPicker">
+      <text class="pr-month">{{monthLabel}}</text>
+      <text class="pr-year">{{currentYear}}</text>
+      <text class="pr-drop">▾</text>
+    </view>
+    <view class="mn-arrow" bindtap="nextMonth">
+      <view class="arr arr-r"></view>
+    </view>
+  </view>
+  <view class="today-btn {{isToday ? 'today-done' : 'today-active'}}" bindtap="goToday">
+    <text class="today-icon">📍</text>
+    <text class="today-text">{{isToday ? '今天' : '回今天'}}</text>
+  </view>
+</view>
+
+<!-- ========== 日期选择条 ========== -->
+<view class="day-bar"
+      bindtouchstart="onDayTouchStart"
+      bindtouchend="onDayTouchEnd">
+  <view class="bar-arr" bindtap="prevDay">
+    <view class="arr arr-l"></view>
+  </view>
+  <scroll-view scroll-x class="day-scroll"
+               scroll-into-view="{{_scrollTarget}}"
+               scroll-with-animation enhanced show-scrollbar="{{false}}">
+    <view id="ds{{item.day}}"
+          class="day-chip {{selectedDay === item.day ? 'day-on' : ''}}"
+          wx:for="{{dayList}}" wx:key="day"
+          data-day="{{item.day}}" bindtap="selectDay">
+      <text class="dc-num">{{item.day}}</text>
+      <text class="dc-wk">{{item.weekday}}</text>
+    </view>
+  </scroll-view>
+  <view class="bar-arr" bindtap="nextDay">
+    <view class="arr arr-r"></view>
+  </view>
+</view>
+
+<!-- ========== 总览卡片 ========== -->
+<view class="summary-card">
+  <view class="sc-bub s1"></view>
+  <view class="sc-bub s2"></view>
+  <view class="sc-row">
+    <view class="sc-item">
+      <text class="sc-lbl">支出</text>
+      <text class="sc-val">¥{{totalExpense}}</text>
+    </view>
+    <view class="sc-div"></view>
+    <view class="sc-item">
+      <text class="sc-lbl">收入</text>
+      <text class="sc-val sc-grn">¥{{totalIncome}}</text>
+    </view>
+    <view class="sc-div"></view>
+    <view class="sc-item">
+      <text class="sc-lbl">结余</text>
+      <text class="sc-val {{balance < 0 ? 'sc-red' : ''}}">¥{{balance}}</text>
+    </view>
+  </view>
+  <view class="bud-bar" wx:if="{{budget > 0}}" bindtap="openBudget">
+    <view class="bud-hd">
+      <text class="bud-l">月度预算</text>
+      <text class="bud-r">¥{{totalExpense}} / ¥{{budget}}</text>
+    </view>
+    <view class="bud-trk">
+      <view class="bud-fill {{budgetOver ? 'bud-over' : ''}}" style="width:{{budgetPercent}}%"></view>
+    </view>
+    <text class="bud-tip {{budgetOver ? 'bud-warn' : ''}}">
+      {{budgetOver ? '已超支 ¥' + (totalExpense - budget) : '剩余 ¥' + (budget - totalExpense)}}
+    </text>
+  </view>
+  <view class="bud-set" wx:else bindtap="openBudget">
+    <text class="bs-ico">🎯</text>
+    <text class="bs-txt">设置月度预算</text>
+    <text class="bs-arr">›</text>
+  </view>
+</view>
+
+<!-- ========== 累计记账统计 ========== -->
+<view class="lifetime-bar">
+  <view class="lf-item">
+    <text class="lf-icon">📅</text>
+    <text class="lf-text">已记账 <text class="lf-num">{{totalRecordDays}}</text> 天</text>
+  </view>
+  <view class="lf-div"></view>
+  <view class="lf-item">
+    <text class="lf-icon">📝</text>
+    <text class="lf-text">累计 <text class="lf-num">{{totalRecordCount}}</text> 笔</text>
+  </view>
+</view>
+
+<!-- ========== 预算预警横幅 ========== -->
+<view class="warn-banner wb-{{budgetWarnType}}" wx:if="{{budgetWarnType}}">
+  <text class="wb-icon">
+    {{budgetWarnType === 'danger' ? '🚨' : budgetWarnType === 'caution' ? '⚠️' : '🎉'}}
+  </text>
+  <text class="wb-text">{{budgetWarnText}}</text>
+</view>
+
+<!-- ========== 视图切换 ========== -->
+<view class="tabs">
+  <view class="tab {{activeTab === 'list' ? 'tab-on' : ''}}"
+        data-tab="list" bindtap="switchView">
+    <text>收支明细</text>
+  </view>
+  <view class="tab {{activeTab === 'stats' ? 'tab-on' : ''}}"
+        data-tab="stats" bindtap="switchView">
+    <text>分类统计</text>
+  </view>
+</view>
+
+<!-- ========== 明细视图 ========== -->
+<block wx:if="{{activeTab === 'list'}}">
+  <block wx:if="{{dateGroups.length > 0}}">
+    <view class="dg" wx:for="{{dateGroups}}" wx:key="date">
+      <view class="dg-hd">
+        <view class="dg-l">
+          <text class="dg-day">{{item.dateLabel}}</text>
+          <text class="dg-wk">{{item.weekday}}</text>
+        </view>
+        <view class="dg-r">
+          <text class="dg-exp" wx:if="{{item.dayExpense > 0}}">支 ¥{{item.dayExpense}}</text>
+          <text class="dg-inc" wx:if="{{item.dayIncome > 0}}">收 ¥{{item.dayIncome}}</text>
+        </view>
+      </view>
+      <view class="rec" wx:for="{{item.records}}" wx:for-item="r" wx:key="id"
+            data-id="{{r.id}}" bindtap="editRecord">
+        <view class="rec-l">
+          <view class="rec-ico {{r.type === 'expense' ? 'ri-e' : 'ri-i'}}">
+            <text>{{r.categoryIcon}}</text>
+          </view>
+          <view class="rec-txt">
+            <text class="rec-nm">{{r.categoryName}}</text>
+            <text class="rec-sub">{{r.note || r.date}}</text>
+          </view>
+        </view>
+        <view class="rec-r">
+          <text class="rec-amt {{r.type === 'expense' ? 'a-e' : 'a-i'}}">
+            {{r.type === 'expense' ? '-' : '+'}}{{r.amount}}
+          </text>
+          <view class="rec-x" data-id="{{r.id}}" catchtap="confirmDelete">
+            <text>×</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+  <view class="emp" wx:else>
+    <text class="emp-ico">📒</text>
+    <text class="emp-t">这一天还没有记录</text>
+    <text class="emp-s">点击右下角按钮开始记账</text>
+  </view>
+</block>
+
+<!-- ========== 统计视图 ========== -->
+<block wx:if="{{activeTab === 'stats'}}">
+  <view class="stats-sub-tabs">
+    <view class="sst {{statsSubTab === 'expense' ? 'sst-on' : ''}}"
+          data-tab="expense" bindtap="switchStatsTab">
+      <text>支出统计</text>
+    </view>
+    <view class="sst {{statsSubTab === 'income' ? 'sst-on-inc' : ''}}"
+          data-tab="income" bindtap="switchStatsTab">
+      <text>收入统计</text>
+    </view>
+  </view>
+
+  <block wx:if="{{statsSubTab === 'expense'}}">
+    <block wx:if="{{categoryStats.length > 0}}">
+      <view class="st-hd">
+        <text class="st-l">本月支出合计</text>
+        <text class="st-v">¥{{totalExpense}}</text>
+      </view>
+      <view class="st-ls">
+        <view class="st-it" wx:for="{{categoryStats}}" wx:key="key">
+          <view class="st-left">
+            <view class="st-ico"><text>{{item.icon}}</text></view>
+            <view class="st-txt">
+              <text class="st-nm">{{item.name}}</text>
+              <text class="st-ct">{{item.count}}笔</text>
+            </view>
+          </view>
+          <view class="st-right">
+            <text class="st-amt">¥{{item.amount}}</text>
+            <view class="st-bg">
+              <view class="st-fg" style="width:{{item.barWidth}}%"></view>
+            </view>
+            <text class="st-pct">{{item.percent}}%</text>
+          </view>
+        </view>
+      </view>
+    </block>
+    <view class="emp" wx:else>
+      <text class="emp-ico">📊</text>
+      <text class="emp-t">暂无支出数据</text>
+      <text class="emp-s">记录第一笔支出后即可查看</text>
+    </view>
+  </block>
+
+  <block wx:if="{{statsSubTab === 'income'}}">
+    <block wx:if="{{incomeCategoryStats.length > 0}}">
+      <view class="st-hd st-hd-inc">
+        <text class="st-l">本月收入合计</text>
+        <text class="st-v st-v-inc">¥{{totalIncome}}</text>
+      </view>
+      <view class="st-ls">
+        <view class="st-it" wx:for="{{incomeCategoryStats}}" wx:key="key">
+          <view class="st-left">
+            <view class="st-ico st-ico-inc"><text>{{item.icon}}</text></view>
+            <view class="st-txt">
+              <text class="st-nm">{{item.name}}</text>
+              <text class="st-ct">{{item.count}}笔</text>
+            </view>
+          </view>
+          <view class="st-right">
+            <text class="st-amt st-amt-inc">¥{{item.amount}}</text>
+            <view class="st-bg">
+              <view class="st-fg-inc" style="width:{{item.barWidth}}%"></view>
+            </view>
+            <text class="st-pct">{{item.percent}}%</text>
+          </view>
+        </view>
+      </view>
+    </block>
+    <view class="emp" wx:else>
+      <text class="emp-ico">💰</text>
+      <text class="emp-t">暂无收入数据</text>
+      <text class="emp-s">记录第一笔收入后即可查看</text>
+    </view>
+  </block>
+</block>
+
+<!-- 底部留白：悬浮条 + 导航栏 + safe-area -->
+<view style="height:300rpx"></view>
+
+</scroll-view>
+
+<!-- ========== 独立音乐播放器组件 ========== -->
+<music-player id="musicPlayer" bind:playlistStateChange="onPlaylistChange" />
+
+<!-- 不再放 <tabbar>，框架通过 custom-tab-bar/ 自动注入 -->
+
+<!-- ========== FAB ========== -->
+<view class="fab" bindtap="openAdd">
+  <text class="fab-plus">+</text>
+</view>
+
+<!-- ========== 自定义月份选择器 ========== -->
+<view class="mask" wx:if="{{showMonthPicker}}"
+      catchtouchmove="preventScroll" bindtap="closeMonthPicker"></view>
+<view class="mp-popup" wx:if="{{showMonthPicker}}" catchtouchmove="preventScroll">
+  <view class="mp-deco-top">
+    <view class="mp-deco-dot"></view>
+    <view class="mp-deco-dot mp-deco-mid"></view>
+    <view class="mp-deco-dot"></view>
+  </view>
+  <view class="mp-head">
+    <text class="mp-title">选择日期</text>
+    <view class="mp-close" bindtap="closeMonthPicker"><text>×</text></view>
+  </view>
+  <view class="mp-year-row">
+    <view class="mp-year-arrow" bindtap="pickerPrevYear">
+      <view class="mp-arr mp-arr-l"></view>
+    </view>
+    <view class="mp-year-pill">
+      <text class="mp-year-num">{{pickerYear}}</text>
+      <text class="mp-year-unit">年</text>
+    </view>
+    <view class="mp-year-arrow" bindtap="pickerNextYear">
+      <view class="mp-arr mp-arr-r"></view>
+    </view>
+  </view>
+  <view class="mp-month-grid">
+    <view class="mp-month-cell {{pickerMonth === item.month ? 'mp-month-on' : ''}} {{item.future ? 'mp-month-future' : ''}}"
+          wx:for="{{pickerMonthGrid}}" wx:key="month"
+          data-month="{{item.month}}" bindtap="pickerSelectMonth">
+      <text class="mp-m-emoji">{{item.emoji}}</text>
+      <text class="mp-m-label">{{item.label}}</text>
+    </view>
+  </view>
+  <view class="mp-hint">
+    <text class="mp-hint-dot"></text>
+    <text class="mp-hint-text">当前: {{currentYear}}年{{monthLabel}}</text>
+  </view>
+  <view class="mp-btns">
+    <view class="mp-btn-cancel" bindtap="closeMonthPicker"><text>取消</text></view>
+    <view class="mp-btn-confirm" bindtap="pickerConfirm"><text>确定</text></view>
+  </view>
+</view>
+
+<!-- ========== 预算弹窗 ========== -->
+<view class="mask" wx:if="{{showBudgetModal}}"
+      catchtouchmove="preventScroll" bindtap="closeBudget"></view>
+<view class="budget-popup" wx:if="{{showBudgetModal}}">
+  <view class="bp-head">
+    <text class="bp-title">🎯 设置月度预算</text>
+    <view class="bp-close" bindtap="closeBudget"><text>×</text></view>
+  </view>
+  <view class="bp-input-row">
+    <text class="bp-yen">¥</text>
+    <input class="bp-input" type="digit" placeholder="输入预算金额"
+           value="{{budgetInput}}" bindinput="onBudgetInput" />
+  </view>
+  <view class="bp-shortcuts">
+    <view class="bp-chip" data-val="1000" catchtap="setBudgetPreset">¥1000</view>
+    <view class="bp-chip" data-val="2000" catchtap="setBudgetPreset">¥2000</view>
+    <view class="bp-chip" data-val="3000" catchtap="setBudgetPreset">¥3000</view>
+    <view class="bp-chip" data-val="5000" catchtap="setBudgetPreset">¥5000</view>
+  </view>
+  <button class="bp-confirm" bindtap="saveBudget">确定</button>
+</view>
+
+<!-- ========== 记账/编辑弹窗 ========== -->
+<view class="mask" wx:if="{{showAdd}}"
+      catchtouchmove="preventScroll" bindtap="closeAdd"></view>
+<view class="add-popup" wx:if="{{showAdd}}" catchtouchmove="preventScroll">
+  <view class="ap-head">
+    <text class="ap-title">{{isEditing ? '编辑记录' : '记一笔'}}</text>
+    <view class="ap-close" bindtap="closeAdd"><text>×</text></view>
+  </view>
+  <view class="ap-type-row">
+    <view class="ap-type-btn {{addType === 'expense' ? 'ap-type-exp' : ''}}"
+          data-type="expense" catchtap="switchType"><text>支出</text></view>
+    <view class="ap-type-btn {{addType === 'income' ? 'ap-type-inc' : ''}}"
+          data-type="income" catchtap="switchType"><text>收入</text></view>
+  </view>
+  <view class="ap-amount-area">
+    <text class="ap-yen">¥</text>
+    <input class="ap-amount" type="digit" placeholder="0.00"
+           value="{{addAmount}}" bindinput="onAmountInput" />
+  </view>
+  <scroll-view scroll-y class="ap-cat-scroll" enhanced show-scrollbar="{{false}}">
+    <view class="ap-cat-grid">
+      <view class="ap-cat {{addCategory === item.key ? 'ap-cat-on' : ''}}"
+            wx:for="{{categoryList}}" wx:key="key"
+            data-key="{{item.key}}" catchtap="selectCategory">
+        <text class="ap-cat-ico">{{item.icon}}</text>
+        <text class="ap-cat-name">{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="ap-bottom">
+    <input class="ap-note" placeholder="添加备注（可选）"
+           value="{{addNote}}" bindinput="onNoteInput" />
+    <button class="ap-save {{addType === 'expense' ? 'ap-save-exp' : 'ap-save-inc'}}"
+            bindtap="saveRecord">
+      {{isEditing ? '更新' : '保存'}}
+    </button>
+  </view>
+</view>
+
+<!-- ========== 删除弹窗 ========== -->
+<view class="mask" wx:if="{{showDeleteModal}}"
+      catchtouchmove="preventScroll" bindtap="cancelDelete"></view>
+<view class="del-popup" wx:if="{{showDeleteModal}}">
+  <view class="dp-ring"><text class="dp-emoji">🥺</text></view>
+  <text class="dp-title">真的要删除吗？</text>
+  <text class="dp-desc">删除后就找不到这条记录了哦~</text>
+  <view class="dp-btns">
+    <view class="dp-no" bindtap="cancelDelete"><text>再想想</text></view>
+    <view class="dp-yes" bindtap="doDelete"><text>删掉它</text></view>
+  </view>
+</view>

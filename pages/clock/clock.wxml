@@ -1,0 +1,220 @@
+<!-- pages/clock/clock.wxml -->
+<view class="page {{loaded ? 'loaded' : ''}}">
+
+<!-- ══════ Hero ══════ -->
+<view class="hero">
+  <view class="hero-glow"></view>
+  <text class="hero-emoji">🌙</text>
+  <text class="hero-star s1">✨</text>
+  <text class="hero-star s2">⭐</text>
+  <text class="hero-star s3">✨</text>
+  <text class="hero-title">晚安提醒</text>
+  <text class="hero-sub">帮你养成每日记录的好习惯</text>
+</view>
+
+<!-- ══════ 主开关 ══════ -->
+<view class="card toggle-card" style="animation-delay:.06s">
+  <view class="tc-left">
+    <view class="tc-icon-box"><text class="tc-icon">🔔</text></view>
+    <view>
+      <text class="tc-title">提醒开关</text>
+      <text class="tc-desc">{{enabled ? '每天 ' + reminderTime + ' 准时提醒' : '开启后每天提醒你记录'}}</text>
+    </view>
+  </view>
+  <view class="switch-track {{enabled ? 'on' : ''}}" bindtap="toggleEnabled">
+    <view class="switch-thumb"><text class="thumb-t">{{enabled ? '✓' : ''}}</text></view>
+  </view>
+</view>
+
+<!-- ══════ 提醒项目 ══════ -->
+<view class="card items-card" wx:if="{{enabled}}" style="animation-delay:.14s">
+  <text class="sec-title">📋 提醒项目</text>
+  <text class="sec-desc">选择需要提醒的记录类型</text>
+  <view class="item-list">
+    <view wx:for="{{todayItems}}" wx:key="key" class="item-row">
+      <text class="ir-icon">{{item.icon}}</text>
+      <view class="ir-info">
+        <text class="ir-name">{{item.name}}</text>
+        <text class="ir-desc">{{item.desc}}</text>
+      </view>
+      <view class="ir-toggle {{item.enabled ? 'on' : ''}}" bindtap="toggleItem" data-key="{{item.key}}">
+        <view class="ir-thumb"></view>
+      </view>
+    </view>
+    <!-- 天气预警开关 -->
+    <view class="item-row">
+      <text class="ir-icon">🌦️</text>
+      <view class="ir-info">
+        <text class="ir-name">天气预警</text>
+        <text class="ir-desc">恶劣天气弹窗提醒（同步主页天气）</text>
+      </view>
+      <view class="ir-toggle {{weatherNotify ? 'on' : ''}}" bindtap="toggleWeatherNotify">
+        <view class="ir-thumb"></view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- ══════ 时间选择 ══════ -->
+<view class="card time-card" wx:if="{{enabled}}" style="animation-delay:.22s">
+  <text class="sec-title">⏰ 提醒时间</text>
+  <view class="time-grid">
+    <view wx:for="{{timePresets}}" wx:key="time"
+          class="tp {{item.time === reminderTime ? 'active' : ''}}"
+          bindtap="selectTime" data-time="{{item.time}}">
+      <text class="tp-em">{{item.emoji}}</text>
+      <text class="tp-t">{{item.time}}</text>
+      <text class="tp-l">{{item.label}}</text>
+    </view>
+  </view>
+  <view class="custom-time-btn" bindtap="openTimePicker">
+    <text>🕐 自定义时间</text>
+  </view>
+</view>
+
+<!-- ══════ 今日清单 ══════ -->
+<view class="card status-card" style="animation-delay:.30s">
+  <view class="sc-head">
+    <text class="sec-title">📋 今日记录</text>
+    <view class="sc-badge {{allCompleted ? 'ok' : ''}}">
+      <text>{{completedCount}}/{{totalEnabledCount}}</text>
+    </view>
+  </view>
+  <view class="prog-row">
+    <view class="prog-track">
+      <view class="prog-fill" style="width:{{completionRate}}%"></view>
+    </view>
+    <text class="prog-txt">{{completionRate}}%</text>
+  </view>
+  <view class="chk-grid">
+    <view wx:for="{{todayItems}}" wx:key="key"
+          class="chk {{item.done ? 'done' : 'pend'}} {{!item.enabled ? 'disabled' : ''}}"
+          bindtap="goRecord" data-page="{{item.page}}" data-nav="{{item.canNav ? '1' : '0'}}">
+      <view class="chk-ic-wrap">
+        <text class="chk-ic">{{item.icon}}</text>
+        <view class="chk-dot" wx:if="{{item.done}}"><text>✓</text></view>
+        <view class="chk-off-dot" wx:if="{{!item.enabled}}"><text>–</text></view>
+      </view>
+      <text class="chk-name">{{item.name}}</text>
+      <text class="chk-st {{item.done ? 'g' : item.enabled ? 'm' : 'off'}}">
+        {{item.done ? '已记录' : item.enabled ? '未记录' : '未开启'}}
+      </text>
+    </view>
+  </view>
+  <view class="celebrate" wx:if="{{allCompleted && totalEnabledCount > 0}}">
+    <text class="cel-em">🎉</text>
+    <text class="cel-t">太棒了！今日全部记录完成！</text>
+  </view>
+</view>
+
+<!-- ══════ 经期提醒 ══════ -->
+<view class="card period-card" wx:if="{{periodApproaching}}" style="animation-delay:.38s">
+  <view class="pc-head">
+    <text class="pc-em">🌸</text>
+    <view>
+      <text class="pc-title">经期即将到来</text>
+      <text class="pc-days">预计{{daysUntilPeriod === 0 ? '今天' : daysUntilPeriod + '天后'}}</text>
+    </view>
+  </view>
+  <text class="pc-msg">{{periodMsg}}</text>
+  <view class="pc-tips">
+    <view wx:for="{{periodTips}}" wx:key="*this" class="pc-tip"><text>{{item}}</text></view>
+  </view>
+</view>
+
+<!-- ══════ 通知权限 ══════ -->
+<view class="card notify-card" wx:if="{{enabled && !notifyEnabled}}" style="animation-delay:.46s">
+  <view class="nc-left">
+    <text class="nc-ic">📲</text>
+    <view>
+      <text class="nc-title">开启系统通知</text>
+      <text class="nc-desc">不在小程序内也能收到提醒</text>
+    </view>
+  </view>
+  <view class="nc-btn" bindtap="requestNotifyPermission">去开启</view>
+</view>
+
+<!-- ══════ 预览 ══════ -->
+<view class="preview-btn" wx:if="{{enabled}}" bindtap="testReminder" style="animation-delay:.54s">
+  <text>👁️ 预览提醒效果</text>
+</view>
+</view>
+
+<!-- ═══════════ 天气通知横幅 ═══════════ -->
+<view wx:if="{{showWeatherNotify}}" class="weather-banner {{wnVisible ? 'show' : ''}}">
+<view class="wb-icon-box"><text class="wb-icon">{{wnIcon}}</text></view>
+<view class="wb-body">
+  <text class="wb-title">{{wnTitle}}</text>
+  <text class="wb-desc">{{wnDesc}}</text>
+</view>
+<text class="wb-close" catchtap="dismissWeatherNotify">✕</text>
+<view class="wb-bar">
+  <view class="wb-bar-fill"></view>
+</view>
+</view>
+
+<!-- ═══════════ 时间选择器 ═══════════ -->
+<view class="overlay {{showTimePicker ? 'vis' : ''}}" catchtouchmove="preventScroll">
+<view class="ov-mask" bindtap="closeTimePicker"></view>
+<view class="picker-sheet {{showTimePicker ? 'up' : ''}}">
+  <view class="ps-bar">
+    <text class="ps-x" bindtap="closeTimePicker">取消</text>
+    <text class="ps-t">选择提醒时间</text>
+    <text class="ps-ok" bindtap="confirmTime">确定</text>
+  </view>
+  <view class="ps-preview"><text class="ps-pv">{{tempTime}}</text></view>
+  <picker-view indicator-class="pv-ind" value="{{pickerValue}}" bindchange="onPickerChange" class="ps-pv-wrap">
+    <picker-view-column>
+      <view wx:for="{{hourList}}" wx:key="*this" class="pv-cell">{{item}}</view>
+    </picker-view-column>
+    <picker-view-column>
+      <view wx:for="{{minuteList}}" wx:key="*this" class="pv-cell">{{item}}</view>
+    </picker-view-column>
+  </picker-view>
+</view>
+</view>
+
+<!-- ═══════════ 提醒通知弹窗 ═══════════ -->
+<view class="overlay {{showReminder ? 'vis' : ''}}" catchtouchmove="preventScroll">
+<view class="ov-mask" bindtap="dismissReminder"></view>
+<view class="rem-panel {{showReminder ? 'drop' : ''}}">
+  <view class="rp-deco">
+    <view class="rp-c c1"></view>
+    <view class="rp-c c2"></view>
+    <view class="rp-c c3"></view>
+  </view>
+
+  <!-- 天气提醒 -->
+  <view class="rp-weather" wx:if="{{reminderWeatherText}}">
+    <text class="rp-wi">⚠️</text>
+    <text class="rp-wt">{{reminderWeatherText}}</text>
+  </view>
+
+  <view class="rp-icon-wrap">
+    <text class="rp-icon">{{periodApproaching ? '🌸' : '🔔'}}</text>
+  </view>
+  <text class="rp-title">{{periodApproaching ? '经期提醒' : '记录提醒'}}</text>
+  <text class="rp-sub">{{periodApproaching ? periodMsg : '还有 ' + missingItems.length + ' 项没记录哦~'}}</text>
+
+  <!-- 缺失列表 -->
+  <view class="rp-list" wx:if="{{!periodApproaching && missingItems.length > 0}}">
+    <view wx:for="{{missingItems}}" wx:key="key" class="rp-item">
+      <text class="rp-ii">{{item.icon}}</text>
+      <text class="rp-in">{{item.name}}</text>
+      <text class="rp-ig">›</text>
+    </view>
+  </view>
+
+  <!-- 经期提示 -->
+  <view class="rp-list" wx:if="{{periodApproaching && periodTips.length > 0}}">
+    <view wx:for="{{periodTips}}" wx:key="*this" class="rp-item rp-ptip">
+      <text class="rp-in">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="rp-acts">
+    <view class="rp-btn rp-no" bindtap="dismissReminder">我知道了</view>
+    <view class="rp-btn rp-go" bindtap="goRecordFirst">去记录</view>
+  </view>
+</view>
+</view>

@@ -1,0 +1,193 @@
+<view class="mp-root theme-{{playlistTheme}}">
+
+<!-- ==================== Toast ==================== -->
+<view class="cute-toast-mask" wx:if="{{toastShow}}">
+  <view class="cute-toast ct-{{toastType}} {{toastShow?'ct-in':''}}">
+    <view class="ct-icon-wrap">
+      <view class="ct-spinner" wx:if="{{toastType==='loading'}}"></view>
+      <text class="ct-icon" wx:else>{{toastIcon}}</text>
+    </view>
+    <text class="ct-text">{{toastText}}</text>
+  </view>
+</view>
+
+<!-- ==================== Modal ==================== -->
+<view class="cm-mask" wx:if="{{modalShow}}" catchtap="_onModalCancel"></view>
+<view class="cm-wrap {{modalShow?'cm-in':''}}" wx:if="{{modalShow}}">
+  <view class="cm-card">
+    <view class="cm-emoji-box"><text class="cm-emoji">{{modalEmoji}}</text></view>
+    <text class="cm-title">{{modalTitle}}</text>
+    <text class="cm-content" wx:if="{{modalContent}}">{{modalContent}}</text>
+    <view class="cm-input-box" wx:if="{{modalInputShow}}">
+      <input class="cm-input" value="{{modalInputValue}}" placeholder="{{modalInputPlaceholder}}"
+             bindinput="_onModalInput" focus="{{modalInputFocus}}"
+             adjust-position="{{true}}" confirm-type="done" bindconfirm="_onModalConfirm" />
+    </view>
+    <view class="cm-btns">
+      <view class="cm-btn cm-btn-cancel" wx:if="{{modalCancelText}}" catchtap="_onModalCancel">
+        <text>{{modalCancelText}}</text>
+      </view>
+      <view class="cm-btn cm-btn-confirm" catchtap="_onModalConfirm">
+        <text>{{modalConfirmText}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- ==================== 迷你悬浮条 ==================== -->
+<view class="mini-bar" wx:if="{{trackList.length > 0 && !showPlaylist}}" catchtap="openPlaylist">
+  <view class="mini-row">
+    <view class="mini-disc {{isPlaying && !isMuted ? 'mini-spin' : ''}}">
+      <text class="mini-disc-note">♪</text>
+    </view>
+    <view class="mini-info">
+      <text class="mini-title">{{trackTitle || '音乐播放器'}}</text>
+      <text class="mini-sub">{{isPlaying ? (isMuted ? '已静音' : '播放中') : '已暂停'}}</text>
+    </view>
+    <view class="mini-btns">
+      <view class="mini-ctrl" catchtap="prevTrack"><text class="mini-ctrl-ic">⏮</text></view>
+      <view class="mini-ctrl mini-play" catchtap="togglePlay">
+        <text class="mini-ctrl-ic">{{isPlaying ? '⏸' : '▶'}}</text>
+      </view>
+      <view class="mini-ctrl" catchtap="nextTrack"><text class="mini-ctrl-ic">⏭</text></view>
+    </view>
+  </view>
+  <view class="mini-pg">
+    <view class="mini-pg-fill" style="width:{{progressPercent}}%"></view>
+  </view>
+</view>
+
+<!-- ==================== 歌单面板 ==================== -->
+<view class="pl-mask" wx:if="{{showPlaylist}}" bindtap="closePlaylist"></view>
+<view class="pl-panel {{showPlaylist?'pl-show':''}} pl-theme-{{playlistTheme}}">
+<view class="pl-handle"></view>
+
+<view class="pl-top">
+  <text class="pl-head-title">{{manageMode ? '管理歌曲' : '正在播放'}}</text>
+  <view class="pl-top-right">
+    <view class="manage-toggle-btn" catchtap="{{manageMode ? 'exitManage' : 'enterManage'}}">
+      <text class="manage-toggle-text">{{manageMode ? '完成' : '管理'}}</text>
+    </view>
+    <view class="theme-btn" catchtap="openThemePicker" wx:if="{{!manageMode}}">
+      <text class="theme-btn-icon">🎨</text>
+    </view>
+    <text class="pl-close" catchtap="closePlaylist">×</text>
+  </view>
+</view>
+
+<block wx:if="{{!manageMode}}">
+  <view class="np-section">
+    <view class="np-disc-mini {{isPlaying?'np-spin':''}}">
+      <view class="np-disc-center"><text>♪</text></view>
+    </view>
+    <view class="np-info">
+      <text class="np-title">{{trackTitle}}</text>
+      <text class="np-index">{{trackIndex + 1}} / {{trackTotal}}</text>
+    </view>
+  </view>
+
+  <view class="pg-section">
+    <text class="pg-time">{{currentTimeStr}}</text>
+    <view class="pg-wrap">
+      <view class="pg-track" catchtouchstart="onBarTouchStart" catchtouchmove="onBarTouchMove"
+            catchtouchend="onBarTouchEnd" catchtap="onBarTap">
+        <view class="pg-rail {{dragActive?'pg-rail-active':''}}"></view>
+        <view class="pg-buffer" style="width:{{progressPercent > 5 ? progressPercent + 8 : 0}}%"></view>
+        <view class="pg-fill {{dragActive?'pg-fill-active':''}}" style="width:{{progressPercent}}%"></view>
+        <view class="pg-handle {{dragActive?'pg-handle-active':''}}" style="left:{{progressPercent}}%"></view>
+      </view>
+      <view class="pg-tooltip {{dragActive?'pg-tooltip-show':''}}" style="left:{{progressPercent}}%">
+        <text class="pg-tooltip-text">{{currentTimeStr}}</text>
+        <view class="pg-tooltip-arrow"></view>
+      </view>
+    </view>
+    <text class="pg-time">{{durationStr}}</text>
+  </view>
+
+  <view class="ctl-row">
+    <view class="ctl-btn ctl-small" catchtap="toggleLoop">
+      <text class="ctl-emoji">{{loopMode==='all'?'🔁':'🔂'}}</text>
+    </view>
+    <view class="ctl-btn ctl-mid" catchtap="prevTrack"><text class="ctl-emoji">⏮</text></view>
+    <view class="ctl-btn ctl-main {{isPlaying?'ctl-active':''}}" catchtap="togglePlay">
+      <view class="ctl-play-tri" wx:if="{{!isPlaying}}"></view>
+      <view class="ctl-pause-bars" wx:else><view class="ctl-pbar"></view><view class="ctl-pbar"></view></view>
+    </view>
+    <view class="ctl-btn ctl-mid" catchtap="nextTrack"><text class="ctl-emoji">⏭</text></view>
+    <view class="ctl-btn ctl-small" catchtap="toggleMute">
+      <text class="ctl-emoji">{{isMuted?'🔇':'🔊'}}</text>
+    </view>
+  </view>
+</block>
+
+<view class="pl-manage-top" wx:if="{{manageMode}}">
+  <text class="pl-manage-hint">长按歌曲可重命名</text>
+  <view class="pl-manage-selall" catchtap="manageSelectAll">
+    <text class="pl-manage-selall-text">{{manageAllSelected ? '取消全选' : '全选'}}</text>
+  </view>
+</view>
+
+<view class="pl-divider"></view>
+
+<scroll-view scroll-y class="pl-list {{manageMode?'pl-list-manage':''}}"
+             scroll-into-view="{{scrollIntoId}}" scroll-with-animation enhanced show-scrollbar="{{false}}">
+  <view class="pl-item {{currentTrackIndex===index?'pl-active':''}} {{manageMode && manageChecks[index]?'pl-checked':''}}"
+        wx:for="{{trackList}}" wx:key="index" id="t{{index}}"
+        data-index="{{index}}" catchtap="onItemTap" bindlongpress="onSongLongPress">
+
+    <view class="pl-check" wx:if="{{manageMode}}" data-index="{{index}}" catchtap="onManageCheck">
+      <view class="pl-check-circle {{manageChecks[index]?'pl-check-on':''}}">
+        <text class="pl-check-tick" wx:if="{{manageChecks[index]}}">✓</text>
+      </view>
+    </view>
+
+    <view class="pl-idx" wx:if="{{!manageMode}}">
+      <text class="pl-idx-num" wx:if="{{currentTrackIndex!==index}}">{{index+1}}</text>
+      <text class="pl-idx-icon {{isPlaying?'pl-idx-anim':''}}" wx:else>♪</text>
+    </view>
+
+    <view class="pl-song">
+      <text class="pl-song-name">{{item.title}}</text>
+      <text class="pl-tag" wx:if="{{item.custom}}">自定义</text>
+    </view>
+
+    <view class="pl-del-btn" wx:if="{{item.custom && !manageMode}}" data-index="{{index}}" catchtap="deleteTrack">
+      <text class="pl-del-label">删除</text>
+    </view>
+  </view>
+</scroll-view>
+
+<view class="pl-import" catchtap="importSong" wx:if="{{!manageMode}}">
+  <view class="pl-import-dot">
+    <text class="pl-import-plus">+</text>
+  </view>
+  <text class="pl-import-text">从手机添加音乐</text>
+</view>
+
+<view class="pl-batch-bar" wx:if="{{manageMode}}">
+  <view class="pl-batch-del {{manageSelectedCount > 0 ? '' : 'pl-batch-disabled'}}" catchtap="manageDeleteSelected">
+    <text class="pl-batch-del-label">🗑️ 删除所选{{manageSelectedCount > 0 ? '（' + manageSelectedCount + '）' : ''}}</text>
+  </view>
+</view>
+
+</view>
+
+<!-- ==================== 主题选择器 ==================== -->
+<view class="theme-mask" wx:if="{{showThemePicker}}" catchtap="closeThemePicker"></view>
+<view class="theme-picker {{showThemePicker?'tp-show':''}}">
+<view class="tp-handle"></view>
+<view class="tp-header">
+  <text class="tp-title">选择主题</text>
+  <text class="tp-close" catchtap="closeThemePicker">×</text>
+</view>
+<view class="tp-grid">
+  <view class="tp-item tp-preview-{{item.key}} {{playlistTheme===item.key?'tp-active':''}}"
+        wx:for="{{themeList}}" wx:key="key" data-key="{{item.key}}" catchtap="selectTheme">
+    <text class="tp-icon">{{item.icon}}</text>
+    <text class="tp-name">{{item.name}}</text>
+    <view class="tp-check" wx:if="{{playlistTheme===item.key}}"><text>✓</text></view>
+  </view>
+</view>
+</view>
+
+</view>

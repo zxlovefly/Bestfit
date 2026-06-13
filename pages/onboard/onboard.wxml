@@ -1,0 +1,23 @@
+<view class="onboard-wrap">
+  <!-- 花瓣飘落层 -->
+  <view class="petal-container">
+    <view class="petal" wx:for="{{petalList}}" wx:key="index" style="--left:{{item.left}}%;--delay:{{item.delay}}s;--size:{{item.size}}rpx;--duration:{{item.duration}}s;"></view>
+  </view>
+
+  <!-- 星星装饰 -->
+  <view class="star star1">✨</view>
+  <view class="star star2">⭐</view>
+
+  <!-- 白色圆形容器 -->
+  <view class="circle-box">
+    <view class="runner man">🏃‍♂️</view>
+    <view class="runner woman">🏃‍♀️</view>
+  </view>
+
+  <view class="text-box">
+    <text class="title">Better & Stronger</text>
+    <text class="desc">记录饮食 · 运动打卡 · 健康管理</text>
+  </view>
+
+  <button class="start-btn" bindtap="goToProfile">开始使用</button>
+</view>

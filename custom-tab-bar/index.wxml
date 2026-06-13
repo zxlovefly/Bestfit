@@ -1,0 +1,22 @@
+<view class="tab-bar-wrap" wx:if="{{visible}}">
+  <view class="tab-bar">
+    <view wx:for="{{tabs}}" wx:key="key"
+      class="tab-item {{item.center ? 'tab-center' : ''}} {{selected === item.index ? 'tab-active' : ''}}"
+      data-index="{{item.index}}"
+      bindtap="switchTab">
+      <block wx:if="{{item.center}}">
+        <view class="bai-wrap">
+          <view class="bai-glow"></view>
+          <view class="bai-orbit"></view>
+          <text class="bai-b">B</text>
+          <text class="bai-ai">AI</text>
+        </view>
+        <text class="tab-text center-text">智慧生活</text>
+      </block>
+      <block wx:else>
+        <view class="tab-icon-wrap"><text class="tab-icon">{{item.icon}}</text></view>
+        <text class="tab-text">{{item.text}}</text>
+      </block>
+    </view>
+  </view>
+</view>

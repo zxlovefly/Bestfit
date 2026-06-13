@@ -1,0 +1,152 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/account/account",
+    "pages/ai/ai",
+    "pages/plan/plan",
+    "pages/user/user",
+    "pages/webview/webview"
+  ],
+  "subpackages": [
+    {
+      "root": "pages/diet",
+      "pages": [
+        "diet",
+        "add-food"
+      ]
+    },
+    {
+      "root": "pages/stats",
+      "pages": [
+        "stats"
+      ]
+    },
+    {
+      "root": "pages/clock",
+      "pages": [
+        "clock"
+      ]
+    },
+    {
+      "root": "pages/exercise",
+      "pages": [
+        "exercise",
+        "add-sport"
+      ]
+    },
+    {
+      "root": "pages/user-info",
+      "pages": [
+        "user-info"
+      ]
+    },
+    {
+      "root": "pages/profile",
+      "pages": [
+        "profile"
+      ]
+    },
+    {
+      "root": "pages/women-health",
+      "pages": [
+        "women-health"
+      ]
+    },
+    {
+      "root": "pages/poo",
+      "pages": [
+        "poo-calendar",
+        "add-poo"
+      ]
+    },
+    {
+      "root": "pages/period",
+      "pages": [
+        "log-period"
+      ]
+    },
+    {
+      "root": "pages/water",
+      "pages": [
+        "water"
+        ,"statistics"
+      ]
+    },
+    {
+      "root": "pages/goal-management",
+      "pages": [
+        "goal-management"
+      ]
+    }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFF8F0",
+    "navigationBarTitleText": "",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#A8A5B8",
+    "selectedColor": "#FB7299",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/account/account",
+        "text": "记账"
+      },
+      {
+        "pagePath": "pages/ai/ai",
+        "text": "AI"
+      },
+      {
+        "pagePath": "pages/plan/plan",
+        "text": "计划"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.record": {
+      "desc": "用于语音输入识别健身问题"
+    },
+    "scope.userLocation": {
+      "desc": "获取您的位置以展示当地天气"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "lazyCodeLoading": "requiredComponents",
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "app-plus": {
+    "android": {
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.MANAGE_EXTERNAL_STORAGE"
+      ],
+      "targetSdkVersion": 33,
+      "abiFilters": [
+        "armeabi-v7a",
+        "arm64-v8a"
+      ],
+      "requestLegacyExternalStorage": true
+    },
+    "ios": {
+      "permissions": [
+        "NSAppleMusicUsageDescription"
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+<!-- ==================== 底部导航栏（5个tab，中间AI凸起） ==================== -->
+<view class="tab-bar" wx:if="{{visible}}">
+
+<!-- 首页 -->
+<view class="tab-item {{selected===0?'active':''}}" data-index="0" bindtap="switchTab">
+  <view class="tab-icon-box">
+    <view class="icon-home {{selected===0?'icon-on':''}}">
+      <view class="home-roof"></view><view class="home-body"></view>
+    </view>
+  </view>
+  <text class="tab-label {{selected===0?'label-on':''}}">首页</text>
+  <view class="dot" wx:if="{{selected===0}}"></view>
+</view>
+
+<!-- 记账 -->
+<view class="tab-item {{selected===1?'active':''}}" data-index="1" bindtap="switchTab">
+  <view class="tab-icon-box">
+    <view class="icon-coin {{selected===1?'icon-on':''}}">
+      <view class="coin-circle"></view><text class="coin-text">¥</text>
+    </view>
+  </view>
+  <text class="tab-label {{selected===1?'label-on':''}}">记账</text>
+  <view class="dot" wx:if="{{selected===1}}"></view>
+</view>
+
+<!-- AI（中央凸起） -->
+<view class="center-area">
+  <view class="ai-btn {{selected===2?'ai-btn-on':''}}" data-index="2" bindtap="switchTab">
+    <view class="ai-btn-glow"></view>
+    <view class="ai-btn-inner">
+      <text class="ai-btn-icon">✦</text>
+    </view>
+    <text class="ai-btn-label {{selected===2?'label-on':''}}">AI</text>
+  </view>
+</view>
+
+<!-- 计划 -->
+<view class="tab-item {{selected===3?'active':''}}" data-index="3" bindtap="switchTab">
+  <view class="tab-icon-box">
+    <view class="icon-plan {{selected===3?'icon-on':''}}">
+      <view class="plan-line l1"></view><view class="plan-line l2"></view><view class="plan-line l3"></view>
+      <view class="plan-dot d1"></view><view class="plan-dot d2"></view><view class="plan-dot d3"></view>
+    </view>
+  </view>
+  <text class="tab-label {{selected===3?'label-on':''}}">计划</text>
+  <view class="dot" wx:if="{{selected===3}}"></view>
+</view>
+
+<!-- 我的 -->
+<view class="tab-item {{selected===4?'active':''}}" data-index="4" bindtap="switchTab">
+  <view class="tab-icon-box">
+    <view class="icon-me {{selected===4?'icon-on':''}}">
+      <view class="me-head"></view><view class="me-body"></view>
+    </view>
+  </view>
+  <text class="tab-label {{selected===4?'label-on':''}}">我的</text>
+  <view class="dot" wx:if="{{selected===4}}"></view>
+</view>
+
+</view>

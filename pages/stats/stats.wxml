@@ -1,0 +1,115 @@
+<view class="page">
+  <view class="header">
+    <text class="h-title">📊 数据统计</text>
+    <text class="h-sub">追踪你的每一次变化</text>
+  </view>
+
+  <!-- 概览卡片 -->
+  <view class="overview" wx:if="{{records.length > 0}}">
+    <view class="ov-row">
+      <view class="ov-card">
+        <text class="ov-icon">⚖️</text>
+        <text class="ov-val">{{currentWeight}}</text>
+        <text class="ov-label">当前体重 kg</text>
+      </view>
+      <view class="ov-card">
+        <text class="ov-icon">🧮</text>
+        <text class="ov-val">{{bmi}}</text>
+        <text class="ov-label">BMI {{bmiLevel}}</text>
+      </view>
+      <view class="ov-card">
+        <text class="ov-icon">{{trendIcon}}</text>
+        <text class="ov-val {{trendClass}}">{{trendDiff}}</text>
+        <text class="ov-label">较上次 {{trendLabel}}</text>
+      </view>
+    </view>
+    <view class="ov-summary">
+      <text>共记录 {{records.length}} 次 · 累计{{totalChangeLabel}} {{totalChange}} kg</text>
+    </view>
+  </view>
+
+  <!-- 身体数据概览 -->
+  <view class="body-overview" wx:if="{{hasBodyData}}">
+    <text class="sec-title">身体数据</text>
+    <view class="bo-row">
+      <view class="bo-card" wx:if="{{latestBodyFat}}">
+        <text class="bo-icon">🔥</text>
+        <text class="bo-val">{{latestBodyFat}}<text class="bo-unit">%</text></text>
+        <text class="bo-label">体脂率</text>
+      </view>
+      <view class="bo-card" wx:if="{{latestMuscleMass}}">
+        <text class="bo-icon">💪</text>
+        <text class="bo-val">{{latestMuscleMass}}<text class="bo-unit">kg</text></text>
+        <text class="bo-label">肌肉量</text>
+      </view>
+      <view class="bo-card" wx:if="{{latestWaistline}}">
+        <text class="bo-icon">📐</text>
+        <text class="bo-val">{{latestWaistline}}<text class="bo-unit">cm</text></text>
+        <text class="bo-label">腰围</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空态 -->
+  <view class="empty" wx:if="{{records.length === 0}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">还没有记录数据</text>
+    <text class="empty-hint">去目标管理页面记录你的第一条体重吧</text>
+  </view>
+
+  <!-- 图表 -->
+  <view class="chart-sec" wx:if="{{records.length >= 2}}">
+    <view class="chart-head">
+      <text class="chart-title">体重趋势</text>
+      <view class="range-tabs">
+        <view class="rt {{range===0?'on':''}}" data-range="0" bindtap="setRange">全部</view>
+        <view class="rt {{range===30?'on':''}}" data-range="30" bindtap="setRange">30天</view>
+        <view class="rt {{range===90?'on':''}}" data-range="90" bindtap="setRange">90天</view>
+      </view>
+    </view>
+    <view class="chart-box">
+      <canvas type="2d" id="statsChart" class="stats-chart"></canvas>
+    </view>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="list-sec" wx:if="{{records.length > 0}}">
+    <text class="sec-title">历史记录</text>
+    <view class="list-card">
+      <view class="list-item" wx:for="{{displayRecords}}" wx:key="date">
+        <view class="li-row">
+          <view class="li-left">
+            <text class="li-date">{{item.dateLabel}}</text>
+            <text class="li-weekday">{{item.weekday}}</text>
+          </view>
+          <view class="li-center">
+            <text class="li-weight">{{item.weight}}</text>
+            <text class="li-unit">kg</text>
+          </view>
+          <view class="li-right">
+            <text class="li-bmi {{item.bmiClass}}">{{item.bmi}}</text>
+            <text class="li-bmi-label">{{item.bmiLevel}}</text>
+          </view>
+          <view class="li-change">
+            <!-- 无上一次记录 -->
+            <text wx:if="{{item.changeDir === 'none'}}" class="ch-flat">--</text>
+            <!-- 增长 红色 -->
+            <text wx:elif="{{item.changeDir === 'up'}}" class="ch-up">+{{item.change}}</text>
+            <!-- 下降 绿色 -->
+            <text wx:elif="{{item.changeDir === 'down'}}" class="ch-down">-{{item.change}}</text>
+            <!-- 持平 灰色 -->
+            <text wx:else class="ch-flat">±{{item.change}}</text>
+          </view>
+        </view>
+        <!-- 身体数据行 -->
+        <view class="li-body" wx:if="{{item.hasBody}}">
+          <text class="li-body-tag" wx:if="{{item.bodyFat}}">体脂 {{item.bodyFat}}%</text>
+          <text class="li-body-tag" wx:if="{{item.muscleMass}}">肌肉 {{item.muscleMass}}kg</text>
+          <text class="li-body-tag" wx:if="{{item.waistline}}">腰围 {{item.waistline}}cm</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="spacer"></view>
+</view>

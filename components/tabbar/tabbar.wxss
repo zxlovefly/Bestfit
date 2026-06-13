@@ -1,0 +1,144 @@
+/* ==================== 底部导航栏 ==================== */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: flex-end; justify-content: space-around;
+  background: #FFF; border-radius: 36rpx 36rpx 0 0; padding: 0 6rpx;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -6rpx 40rpx rgba(0,0,0,0.07);
+  background-image: linear-gradient(90deg, transparent, transparent 28%, rgba(251,114,153,0.15) 38%, rgba(251,114,153,0.3) 50%, rgba(251,114,153,0.15) 62%, transparent 72%, transparent);
+  background-size: 100% 3rpx; background-repeat: no-repeat; background-position: top;
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; padding: 10rpx 0 12rpx; position: relative;
+}
+.tab-icon-box {
+  width: 56rpx; height: 56rpx;
+  display: flex; align-items: center; justify-content: center;
+}
+.tab-label {
+  font-size: 20rpx; color: #BCB8C8; margin-top: 6rpx;
+  font-weight: 500; letter-spacing: 1rpx;
+}
+.label-on { color: #FB7299; font-weight: 700; }
+.dot {
+  width: 8rpx; height: 8rpx; border-radius: 50%; background: #FB7299; margin-top: 6rpx;
+  animation: dotPop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes dotPop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.6); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== CSS 图标 ===== */
+
+/* 首页 */
+.icon-home { position: relative; width: 44rpx; height: 40rpx; }
+.home-roof {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 24rpx solid transparent;
+  border-right: 24rpx solid transparent;
+  border-bottom: 16rpx solid #C8C4D4;
+}
+.home-body {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 30rpx; height: 22rpx;
+  border-radius: 4rpx 4rpx 0 0; background: #C8C4D4;
+}
+.icon-on .home-roof { border-bottom-color: #FB7299; }
+.icon-on .home-body { background: #FB7299; }
+
+/* 记账 */
+.icon-coin {
+  position: relative; width: 40rpx; height: 40rpx;
+  display: flex; align-items: center; justify-content: center;
+}
+.coin-circle {
+  width: 38rpx; height: 38rpx; border-radius: 50%;
+  border: 4rpx solid #C8C4D4; box-sizing: border-box;
+}
+.coin-text {
+  position: absolute; font-size: 22rpx; font-weight: 800; color: #C8C4D4;
+}
+.icon-on .coin-circle { border-color: #FB7299; background: rgba(251,114,153,0.1); }
+.icon-on .coin-text { color: #FB7299; }
+
+/* 计划 */
+.icon-plan { position: relative; width: 38rpx; height: 42rpx; }
+.plan-line { position: absolute; left: 14rpx; height: 3rpx; border-radius: 2rpx; background: #C8C4D4; }
+.plan-line.l1 { top: 8rpx; width: 24rpx; }
+.plan-line.l2 { top: 19rpx; width: 18rpx; }
+.plan-line.l3 { top: 30rpx; width: 20rpx; }
+.plan-dot { position: absolute; width: 8rpx; height: 8rpx; border-radius: 50%; background: #C8C4D4; }
+.plan-dot.d1 { top: 6rpx; left: 2rpx; }
+.plan-dot.d2 { top: 17rpx; left: 2rpx; }
+.plan-dot.d3 { top: 28rpx; left: 2rpx; }
+.icon-on .plan-line { background: #FB7299; }
+.icon-on .plan-dot { background: #FB7299; }
+
+/* 我的 */
+.icon-me {
+  position: relative; width: 40rpx; height: 42rpx;
+  display: flex; flex-direction: column; align-items: center;
+}
+.me-head { width: 22rpx; height: 22rpx; border-radius: 50%; background: #C8C4D4; margin-top: 2rpx; }
+.me-body { width: 34rpx; height: 16rpx; border-radius: 18rpx 18rpx 0 0; background: #C8C4D4; margin-top: 4rpx; }
+.icon-on .me-head { background: #FB7299; }
+.icon-on .me-body { background: #FB7299; }
+
+/* ===== 中央 AI 凸起按钮 ===== */
+.center-area {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; padding-bottom: 10rpx; overflow: visible; position: relative;
+}
+
+.ai-btn {
+  display: flex; flex-direction: column; align-items: center;
+  position: relative; -webkit-tap-highlight-color: transparent;
+}
+.ai-btn-inner {
+  width: 92rpx; height: 92rpx; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: -40rpx;
+  position: relative; z-index: 2;
+  box-shadow: 0 6rpx 28rpx rgba(99,102,241,0.40);
+  border: 4rpx solid rgba(255,255,255,0.7);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.ai-btn:active .ai-btn-inner { transform: scale(0.92); }
+.ai-btn-on .ai-btn-inner {
+  transform: scale(1.06);
+  box-shadow: 0 8rpx 36rpx rgba(99,102,241,0.55);
+}
+
+.ai-btn-glow {
+  position: absolute; top: -52rpx;
+  width: 112rpx; height: 112rpx; border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%);
+  z-index: 1; pointer-events: none;
+  animation: aiGlow 2.5s ease-in-out infinite;
+}
+@keyframes aiGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.18); }
+}
+
+.ai-btn-icon { font-size: 40rpx; color: #fff; font-weight: 700; }
+
+.ai-btn-label {
+  font-size: 20rpx; color: #BCB8C8; font-weight: 500;
+  letter-spacing: 1rpx; margin-top: 4rpx;
+  transition: color 0.2s;
+}
+.ai-btn-on .ai-btn-label { color: #7c3aed; font-weight: 700; }
+
+/* AI 活跃时底部标签也加圆点 */
+.ai-dot {
+  width: 8rpx; height: 8rpx; border-radius: 50%;
+  background: #7c3aed; margin-top: 6rpx;
+  animation: dotPop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}

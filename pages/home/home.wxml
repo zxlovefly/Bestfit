@@ -1,0 +1,586 @@
+<scroll-view scroll-y class="home-wrap" style="height:100vh">
+
+<!-- ==================== 问候卡片 ==================== -->
+<view class="greet-card {{greetWeatherReady && greetAnimType ? 'greet-weather greet-' + greetAnimType : timePeriod}}"
+      style="{{greetWeatherReady && greetAnimType ? 'background:' + greetBg : ''}}">
+  <view class="deco-layer">
+    <block wx:if="{{greetWeatherReady && greetAnimType}}">
+      <block wx:if="{{greetAnimType === 'sunny'}}">
+        <view class="greet-sun-glow-card"></view>
+        <view class="greet-sun-halo-card"></view>
+        <view wx:for="{{sunParticles}}" wx:key="index" class="greet-sun-dot-card"
+              style="left:{{item.l}};top:{{item.t}};width:{{item.s}};height:{{item.s}};animation-duration:{{item.d}};animation-delay:{{item.del}}"></view>
+      </block>
+      <block wx:if="{{greetAnimType === 'rainy'}}">
+        <view wx:for="{{rainDrops}}" wx:key="index" class="greet-raindrop"
+              style="left:{{item.l}};animation-duration:{{item.d}};animation-delay:{{item.del}};height:{{item.h}}"></view>
+        <view class="greet-wet-overlay"></view>
+        <view wx:for="{{glassDrops}}" wx:key="index" class="greet-glass-drop"
+              style="left:{{item.l}};top:{{item.t}};width:{{item.s}};height:{{item.s}};animation-duration:{{item.d}};animation-delay:{{item.del}}"></view>
+        <view class="greet-streak gs1"></view>
+        <view class="greet-streak gs2"></view>
+        <view class="greet-streak gs3"></view>
+        <view class="greet-streak gs4"></view>
+        <view class="greet-splash gs-sp1"></view>
+        <view class="greet-splash gs-sp2"></view>
+        <view class="greet-splash gs-sp3"></view>
+        <view class="greet-splash gs-sp4"></view>
+        <view class="greet-splash gs-sp5"></view>
+        <view class="greet-splash gs-sp6"></view>
+      </block>
+      <block wx:if="{{greetAnimType === 'snowy'}}">
+        <view class="greet-snow-ground"></view>
+        <view wx:for="{{snowFlakes}}" wx:key="index" class="greet-snow-dot"
+              style="left:{{item.l}};width:{{item.s}};height:{{item.s}};animation-duration:{{item.d}};animation-delay:{{item.del}}"></view>
+      </block>
+      <block wx:if="{{greetAnimType === 'thunder'}}">
+        <view class="greet-lightning-card"></view>
+        <view wx:for="{{rainDrops}}" wx:key="index" class="greet-tdrop"
+              style="left:{{item.l}};animation-duration:{{item.d}};animation-delay:{{item.del}};height:{{item.h}}"></view>
+        <view class="greet-splash gs-sp1"></view>
+        <view class="greet-splash gs-sp2"></view>
+        <view class="greet-splash gs-sp3"></view>
+        <view class="greet-splash gs-sp4"></view>
+        <view class="greet-splash gs-sp5"></view>
+        <view class="greet-splash gs-sp6"></view>
+      </block>
+      <block wx:if="{{greetAnimType === 'cloudy'}}">
+        <view wx:for="{{cloudList}}" wx:key="index" class="greet-cloud-card"
+              style="top:{{item.t}};animation-duration:{{item.d}};animation-delay:{{item.del}}">☁️</view>
+      </block>
+      <block wx:if="{{greetAnimType === 'foggy'}}">
+        <view wx:for="{{fogLayers}}" wx:key="index" class="greet-fog-card"
+              style="top:{{item.t}};opacity:{{item.o}};animation-duration:{{item.d}}"></view>
+      </block>
+    </block>
+  </view>
+  <view class="greet-content">
+    <view class="greet-top-row">
+      <view class="greet-left">
+        <text class="greet-emoji">{{greetEmoji}}</text>
+        <text class="greet-main">{{greetText}}~</text>
+      </view>
+    </view>
+    <text class="greet-desc">{{greetDesc}}</text>
+    <view class="greet-meta">
+      <view class="meta-tag weather-tag" wx:if="{{weatherLoaded}}" bindtap="onTapWeather">
+        <text>{{weatherIcon}} {{weatherCity}} {{weatherTemp}} {{weatherText}}</text>
+      </view>
+      <view class="meta-tag weather-tag weather-placeholder" wx:if="{{!weatherLoaded}}" bindtap="onTapWeather">
+        <text>📍 点击获取天气</text>
+      </view>
+      <view class="meta-tag"><text>📅 {{currentDate}}</text></view>
+      <view class="meta-tag"><text>🌿 第 {{journeyDays}} 天</text></view>
+    </view>
+    <view class="weather-tip" wx:if="{{weatherTip}}"><text class="wt-text">{{weatherTip}}</text></view>
+  </view>
+</view>
+
+<!-- ==================== 热量环 ==================== -->
+<view class="cal-card">
+  <view class="cal-header">
+    <view class="cal-header-left">
+      <text class="cal-title">热量管理</text>
+      <text class="cal-subtitle" wx:if="{{hasProfile}}">{{calPlan.activityIcon}} {{calPlan.activityLabel}} · {{calPlan.activityDesc}}</text>
+      <text class="cal-subtitle no-profile-hint" wx:else>完善资料获取个性化方案</text>
+    </view>
+    <view class="cal-header-right">
+      <view class="goal-badge" wx:if="{{hasProfile}}"
+            style="background:{{calPlan.goalColor}}18;color:{{calPlan.goalColor}};border:1rpx solid {{calPlan.goalColor}}40">
+        <text>{{calPlan.goalIcon}} {{calPlan.goalLabel}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="dual-ring-section">
+    <text class="dr-label dr-label-top">🔥 消耗</text>
+    <view class="dual-ring-wrap">
+      <view class="dual-ring" style="background:{{ringGrad}}">
+        <view class="dr-separator"></view>
+        <view class="dr-inner">
+          <text class="dr-surplus-val" style="color:{{surplusColor}}">{{calSurplusShow}}</text>
+          <text class="dr-surplus-unit">千卡</text>
+          <text class="dr-surplus-label" style="color:{{surplusColor}}">{{surplusText}}</text>
+        </view>
+      </view>
+    </view>
+    <text class="dr-label dr-label-bottom">🍽️ 摄入</text>
+    <view class="dr-legend">
+      <view class="dr-leg-item"><view class="dr-leg-dot" style="background:#FFB347"></view><text class="dr-leg-text">消耗 {{calBurn}} 千卡（基础代谢+运动）</text></view>
+      <view class="dr-leg-item"><view class="dr-leg-dot" style="background:#FFB4C2"></view><text class="dr-leg-text">摄入 {{calIntake}} / 目标 {{calTarget}} 千卡</text></view>
+    </view>
+  </view>
+  <view class="cal-warn-card warn-low" wx:if="{{calWarning === 'low'}}">
+    <text class="warn-icon">⚠️</text>
+    <view class="warn-info"><text class="warn-title">摄入不足提醒</text><text class="warn-desc">{{calWarningText}}</text></view>
+  </view>
+  <view class="cal-warn-card warn-high" wx:if="{{calWarning === 'high'}}">
+    <text class="warn-icon">🔔</text>
+    <view class="warn-info"><text class="warn-title">摄入超标提醒</text><text class="warn-desc">{{calWarningText}}</text></view>
+  </view>
+  <view class="cal-setup-prompt" wx:if="{{!hasProfile}}">
+    <text class="np-icon">📋</text>
+    <view class="np-content">
+      <text class="np-title">开启个性化热量方案</text>
+      <text class="np-desc">填写身高、体重、年龄等信息，自动计算 TDEE 和每日热量目标</text>
+    </view>
+    <view class="np-btn" bindtap="goProfile">去设置</view>
+  </view>
+  <view class="tdee-toggle" wx:if="{{hasProfile}}" bindtap="toggleTDEEDetails">
+    <text class="tdee-toggle-label">TDEE 热量分解</text>
+    <view class="tdee-toggle-arrow {{showTDEEDetails ? 'arrow-up' : ''}}"><text>›</text></view>
+  </view>
+  <view class="tdee-details {{showTDEEDetails ? 'expanded' : ''}}" wx:if="{{hasProfile}}">
+    <view class="tdee-section">
+      <view class="tdee-row">
+        <view class="tdee-icon-wrap" style="background:#FFECD2">🔥</view>
+        <view class="tdee-row-info"><text class="tdee-label">基础代谢 (BMR)</text><text class="tdee-desc">静息状态下身体消耗</text></view>
+        <text class="tdee-value">{{calPlan.bmr}}</text><text class="tdee-unit">千卡</text>
+      </view>
+      <view class="tdee-row">
+        <view class="tdee-icon-wrap" style="background:#D4F1F9">{{calPlan.activityIcon}}</view>
+        <view class="tdee-row-info"><text class="tdee-label">日常活动消耗</text><text class="tdee-desc">活动系数 ×{{calPlan.activityMultiplier}}</text></view>
+        <text class="tdee-value">{{calPlan.tdee}}</text><text class="tdee-unit">千卡</text>
+      </view>
+      <view class="tdee-row">
+        <view class="tdee-icon-wrap" style="background:#D4EDDA">🏃</view>
+        <view class="tdee-row-info"><text class="tdee-label">运动消耗</text><text class="tdee-desc">运动打卡后自动计算</text></view>
+        <text class="tdee-value">{{calPlan.exerciseCal}}</text><text class="tdee-unit">千卡</text>
+      </view>
+      <view class="tdee-divider"></view>
+      <view class="tdee-row tdee-row-bold">
+        <view class="tdee-icon-wrap" style="background:#F0ECF5">⚡</view>
+        <view class="tdee-row-info"><text class="tdee-label">总能量消耗</text><text class="tdee-desc">BMR + 活动 + 运动</text></view>
+        <text class="tdee-value">{{calPlan.dailyBurn}}</text><text class="tdee-unit">千卡</text>
+      </view>
+      <view class="tdee-row" wx:if="{{calPlan.adjust !== 0}}">
+        <view class="tdee-icon-wrap" style="background:{{calPlan.goalColor}}18">{{calPlan.goalIcon}}</view>
+        <view class="tdee-row-info"><text class="tdee-label">目标调整（{{calPlan.goalLabel}}）</text><text class="tdee-desc">{{calPlan.goalDesc}}</text></view>
+        <text class="tdee-value" style="color:{{calPlan.adjust > 0 ? '#6BCB77' : '#FF6B6B'}}">{{calPlan.adjustText}}</text><text class="tdee-unit">千卡</text>
+      </view>
+      <view class="tdee-divider thick"></view>
+      <view class="tdee-row tdee-row-target">
+        <view class="tdee-icon-wrap" style="background:#E8D5F5">🎯</view>
+        <view class="tdee-row-info"><text class="tdee-label">每日摄入目标</text><text class="tdee-desc">建议每日摄入量</text></view>
+        <text class="tdee-value accent">{{calPlan.target}}</text><text class="tdee-unit">千卡</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- ==================== 快捷入口 ==================== -->
+<view class="sc-title">快捷入口</view>
+<view class="sc-grid">
+  <!-- 喝水卡片（带进度条） -->
+  <view class="sc-card sc-card-water" bindtap="goWaterPage">
+    <view class="sc-liquid"></view>
+    <view class="sc-body">
+      <view class="sc-icon-wrap sc-ib-water"><text class="sc-emoji">💧</text></view>
+      <view class="sc-info">
+        <text class="sc-name">喝水记录</text>
+        <text class="sc-desc" wx:if="{{waterTodayML <= waterTotalTargetML || waterTotalTargetML <= 0}}">{{waterTodayML}}/{{waterTotalTargetML}} ml</text>
+        <text class="sc-desc sc-done" wx:else>{{waterTodayML}} ml ✅</text>
+      </view>
+    </view>
+    <view style="position:absolute;bottom:0;left:0;right:0;height:6rpx;background:rgba(0,0,0,0.06);border-radius:0 0 16rpx 16rpx;overflow:hidden">
+      <view style="height:100%;width:{{waterPercent}}%;background:linear-gradient(90deg,#8EC5FC,#6C8EEF);border-radius:0 0 16rpx 16rpx;transition:width .3s ease"></view>
+    </view>
+  </view>
+  <!-- 饮食记录卡片（带进度条，与热量环同步） -->
+  <view class="sc-card sc-card-diet" bindtap="goDiet">
+    <view class="sc-liquid"></view>
+    <view class="sc-body">
+      <view class="sc-icon-wrap sc-ib-diet"><text class="sc-emoji">📝</text></view>
+      <view class="sc-info">
+        <text class="sc-name">记录饮食</text>
+        <text class="sc-desc">今日 {{calIntake}} / {{calTarget}} 千卡</text>
+      </view>
+    </view>
+    <view style="position:absolute;bottom:0;left:0;right:0;height:6rpx;background:rgba(0,0,0,0.06);border-radius:0 0 16rpx 16rpx;overflow:hidden">
+      <view style="height:100%;width:{{dietPercent}}%;background:linear-gradient(90deg,#FFB4C2,#FF6B6B);border-radius:0 0 16rpx 16rpx;transition:width .3s ease"></view>
+    </view>
+  </view>
+  <!-- ★ 修改点：运动打卡卡片改用 exerciseCalOnly，与运动页纯运动热量一致 -->
+  <view class="sc-card sc-card-sport" bindtap="goExercise">
+    <view class="sc-liquid"></view>
+    <view class="sc-body">
+      <view class="sc-icon-wrap sc-ib-sport"><text class="sc-emoji">🏋️</text></view>
+      <view class="sc-info"><text class="sc-name">运动打卡</text><text class="sc-desc">消耗 {{exerciseCalOnly}} 千卡</text></view>
+    </view>
+  </view>
+  <view class="sc-card sc-card-poo" bindtap="goPooCalendar">
+    <view class="sc-liquid"></view>
+    <view class="sc-body">
+      <view class="sc-icon-wrap sc-ib-poo"><text class="sc-emoji">💩</text></view>
+      <view class="sc-info"><text class="sc-name">便便记录</text><text class="sc-desc">肠道健康打卡</text></view>
+    </view>
+  </view>
+</view>
+
+<!-- ==================== 女性健康 ==================== -->
+<view class="wc-card" bindtap="goWomenHealth">
+  <view class="wc-left">
+    <view class="wc-icon-wrap"><text class="wc-emoji">🌸</text></view>
+    <view class="wc-info">
+      <text class="wc-name">女性健康</text>
+      <text class="wc-desc">经期追踪 · 排卵预测 · 健康管理</text>
+    </view>
+  </view>
+  <text class="wc-arrow">›</text>
+</view>
+
+<!-- ==================== 今日计划 ==================== -->
+<view class="plan-title">今日计划</view>
+<view class="plan-list">
+  <view class="plan-item food-item">
+    <view class="p-icon-area">
+      <view class="p-icon food-main-icon {{foodBursting ? 'icon-bounce' : ''}}">🍽️</view>
+      <view class="burst-wrap" wx:if="{{foodBursting}}">
+        <text class="bf bf0">{{foodBurstList[0]}}</text><text class="bf bf1">{{foodBurstList[1]}}</text>
+        <text class="bf bf2">{{foodBurstList[2]}}</text><text class="bf bf3">{{foodBurstList[3]}}</text>
+        <text class="bf bf4">{{foodBurstList[4]}}</text><text class="bf bf5">{{foodBurstList[5]}}</text>
+        <text class="bf bf6">{{foodBurstList[6]}}</text><text class="bf bf7">{{foodBurstList[7]}}</text>
+        <text class="bf bf8">{{foodBurstList[8]}}</text><text class="bf bf9">{{foodBurstList[9]}}</text>
+      </view>
+    </view>
+    <view class="p-info">
+      <text class="p-name">好好吃饭 🥗</text>
+      <text class="p-desc">{{todayPlan.foodTip}}</text>
+      <view class="mini-btns">
+        <view class="mini-btn food-btn" bindtap="onFoodBurst"><text>🍎</text></view>
+        <view class="mini-btn food-btn" bindtap="onFoodBurst"><text>🥑</text></view>
+        <view class="mini-btn food-btn" bindtap="onFoodBurst"><text>🥕</text></view>
+        <view class="mini-btn food-btn" bindtap="onFoodBurst"><text>🍚</text></view>
+        <view class="mini-btn food-btn" bindtap="onFoodBurst"><text>🍵</text></view>
+      </view>
+    </view>
+  </view>
+  <view class="plan-item sport-item">
+    <view class="p-icon-area">
+      <view class="p-icon sport-main-icon {{sportBursting ? 'icon-bounce' : ''}}">🏃</view>
+      <view class="burst-wrap" wx:if="{{sportBursting}}">
+        <text class="bf bf0">{{sportBurstList[0]}}</text><text class="bf bf1">{{sportBurstList[1]}}</text>
+        <text class="bf bf2">{{sportBurstList[2]}}</text><text class="bf bf3">{{sportBurstList[3]}}</text>
+        <text class="bf bf4">{{sportBurstList[4]}}</text><text class="bf bf5">{{sportBurstList[5]}}</text>
+        <text class="bf bf6">{{sportBurstList[6]}}</text><text class="bf bf7">{{sportBurstList[7]}}</text>
+        <text class="bf bf8">{{sportBurstList[8]}}</text><text class="bf bf9">{{sportBurstList[9]}}</text>
+      </view>
+    </view>
+    <view class="p-info">
+      <text class="p-name">适量运动 💪</text>
+      <text class="p-desc">{{todayPlan.sportTip}}</text>
+      <view class="mini-btns">
+        <view class="mini-btn sport-btn" bindtap="onSportBurst"><text>🏃‍♂️</text></view>
+        <view class="mini-btn sport-btn" bindtap="onSportBurst"><text>🚴</text></view>
+        <view class="mini-btn sport-btn" bindtap="onSportBurst"><text>🧘</text></view>
+        <view class="mini-btn sport-btn" bindtap="onSportBurst"><text>🏊</text></view>
+        <view class="mini-btn sport-btn" bindtap="onSportBurst"><text>🔥</text></view>
+      </view>
+    </view>
+  </view>
+  <view class="plan-item mood-item">
+    <view class="p-icon-area">
+      <view class="p-icon mood-main-icon {{moodBursting ? 'icon-bounce' : ''}}">😊</view>
+      <view class="burst-wrap" wx:if="{{moodBursting}}">
+        <text class="bf bf0">{{moodBurstList[0]}}</text><text class="bf bf1">{{moodBurstList[1]}}</text>
+        <text class="bf bf2">{{moodBurstList[2]}}</text><text class="bf bf3">{{moodBurstList[3]}}</text>
+        <text class="bf bf4">{{moodBurstList[4]}}</text><text class="bf bf5">{{moodBurstList[5]}}</text>
+        <text class="bf bf6">{{moodBurstList[6]}}</text><text class="bf bf7">{{moodBurstList[7]}}</text>
+        <text class="bf bf8">{{moodBurstList[8]}}</text><text class="bf bf9">{{moodBurstList[9]}}</text>
+      </view>
+    </view>
+    <view class="p-info">
+      <text class="p-name">保持好心情 💛</text>
+      <text class="p-desc">{{todayPlan.moodTip}}</text>
+      <view class="mini-btns">
+        <view class="mini-btn mood-btn" bindtap="onMoodBurst"><text>🥰</text></view>
+        <view class="mini-btn mood-btn" bindtap="onMoodBurst"><text>💖</text></view>
+        <view class="mini-btn mood-btn" bindtap="onMoodBurst"><text>🌈</text></view>
+        <view class="mini-btn mood-btn" bindtap="onMoodBurst"><text>✨</text></view>
+        <view class="mini-btn mood-btn" bindtap="onMoodBurst"><text>🌸</text></view>
+      </view>
+    </view>
+  </view>
+  <view class="plan-item sleep-item">
+    <view class="p-icon-area">
+      <view class="p-icon sleep-main-icon {{sleepBursting ? 'icon-bounce' : ''}}">🌙</view>
+      <view class="burst-wrap" wx:if="{{sleepBursting}}">
+        <text class="bf bf0">{{sleepBurstList[0]}}</text><text class="bf bf1">{{sleepBurstList[1]}}</text>
+        <text class="bf bf2">{{sleepBurstList[2]}}</text><text class="bf bf3">{{sleepBurstList[3]}}</text>
+        <text class="bf bf4">{{sleepBurstList[4]}}</text><text class="bf bf5">{{sleepBurstList[5]}}</text>
+        <text class="bf bf6">{{sleepBurstList[6]}}</text><text class="bf bf7">{{sleepBurstList[7]}}</text>
+        <text class="bf bf8">{{sleepBurstList[8]}}</text><text class="bf bf9">{{sleepBurstList[9]}}</text>
+      </view>
+    </view>
+    <view class="p-info">
+      <text class="p-name">好好睡觉 🌛</text>
+      <text class="p-desc">{{todayPlan.sleepTip}}</text>
+      <view class="mini-btns">
+        <view class="mini-btn sleep-btn" bindtap="onSleepBurst"><text>⭐</text></view>
+        <view class="mini-btn sleep-btn" bindtap="onSleepBurst"><text>💤</text></view>
+        <view class="mini-btn sleep-btn" bindtap="onSleepBurst"><text>🛏️</text></view>
+        <view class="mini-btn sleep-btn" bindtap="onSleepBurst"><text>🧸</text></view>
+        <view class="mini-btn sleep-btn" bindtap="onSleepBurst"><text>☁️</text></view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 底部留白 -->
+<view style="height:300rpx"></view>
+</scroll-view>
+
+<!-- 音乐播放器组件 -->
+<music-player id="musicPlayer" bind:playlistStateChange="onPlaylistChange" />
+
+<!-- 天气详情弹窗 -->
+<view class="wd-mask" wx:if="{{showWeatherDetail}}">
+<scroll-view scroll-y class="wd-panel" style="background:{{weatherBg}}">
+  <view class="wd-anim-layer">
+    <block wx:if="{{weatherAnimType === 'sunny'}}">
+      <view class="sun-core"></view>
+      <view class="sun-ray sr1"></view><view class="sun-ray sr2"></view>
+      <view class="sun-ray sr3"></view><view class="sun-ray sr4"></view>
+      <view class="sun-ray sr5"></view><view class="sun-ray sr6"></view>
+      <view class="sun-ray sr7"></view><view class="sun-ray sr8"></view>
+      <view wx:for="{{sunParticles}}" wx:key="index" class="sun-particle"
+            style="left:{{item.l}};top:{{item.t}};width:{{item.s}};height:{{item.s}};animation-duration:{{item.d}};animation-delay:{{item.del}}"></view>
+    </block>
+    <block wx:if="{{weatherAnimType === 'rainy'}}">
+      <view wx:for="{{rainDrops}}" wx:key="index" class="raindrop"
+            style="left:{{item.l}};animation-duration:{{item.d}};animation-delay:{{item.del}};height:{{item.h}}"></view>
+      <view class="wd-splash wd-sp1"></view><view class="wd-splash wd-sp2"></view>
+      <view class="wd-splash wd-sp3"></view><view class="wd-splash wd-sp4"></view>
+      <view class="wd-splash wd-sp5"></view><view class="wd-splash wd-sp6"></view>
+      <view class="wd-splash wd-sp7"></view><view class="wd-splash wd-sp8"></view>
+    </block>
+    <block wx:if="{{weatherAnimType === 'thunder'}}">
+      <view wx:for="{{rainDrops}}" wx:key="index" class="raindrop"
+            style="left:{{item.l}};animation-duration:{{item.d}};animation-delay:{{item.del}};height:{{item.h}}"></view>
+      <view class="lightning-flash"></view>
+      <view class="wd-splash wd-sp1"></view><view class="wd-splash wd-sp2"></view>
+      <view class="wd-splash wd-sp3"></view><view class="wd-splash wd-sp4"></view>
+      <view class="wd-splash wd-sp5"></view><view class="wd-splash wd-sp6"></view>
+    </block>
+    <block wx:if="{{weatherAnimType === 'snowy'}}">
+      <view wx:for="{{snowFlakes}}" wx:key="index" class="snowflake"
+            style="left:{{item.l}};width:{{item.s}};height:{{item.s}};animation-duration:{{item.d}};animation-delay:{{item.del}}"></view>
+    </block>
+    <block wx:if="{{weatherAnimType === 'cloudy'}}">
+      <view wx:for="{{cloudList}}" wx:key="index" class="wd-cloud"
+            style="top:{{item.t}};font-size:{{item.s}};animation-duration:{{item.d}};animation-delay:{{item.del}}">☁️</view>
+    </block>
+    <block wx:if="{{weatherAnimType === 'foggy'}}">
+      <view wx:for="{{fogLayers}}" wx:key="index" class="fog-band"
+            style="top:{{item.t}};opacity:{{item.o}};animation-duration:{{item.d}}"></view>
+    </block>
+  </view>
+  <view class="wd-close" bindtap="closeWeatherDetail" style="color:{{wdTextColor}}">✕</view>
+  <view class="wd-head" style="color:{{wdTextColor}}">
+    <text class="wd-city">{{wd.cityName || weatherCity}}</text>
+    <view class="wd-temp-row">
+      <text class="wd-big-icon">{{wd.icon}}</text>
+      <text class="wd-big-temp">{{wd.temp}}</text>
+    </view>
+    <text class="wd-desc">{{wd.desc}}</text>
+    <text class="wd-feels">体感 {{wd.feelsLike}}</text>
+    <view class="wd-range">
+      <text>↓ {{wd.tempMin}}</text>
+      <view class="wd-range-bar"><view class="wd-range-fill"></view></view>
+      <text>↑ {{wd.tempMax}}</text>
+    </view>
+  </view>
+  <!-- 气象预警 -->
+  <view wx:if="{{wd.warnings && wd.warnings.length > 0}}" style="padding:0 32rpx;margin-bottom:20rpx">
+    <view wx:for="{{wd.warnings}}" wx:key="index"
+          style="background:{{item.color}}18;border-left:6rpx solid {{item.color}};border-radius:12rpx;padding:20rpx 24rpx;margin-bottom:12rpx">
+      <view style="display:flex;align-items:center;margin-bottom:8rpx">
+        <text style="font-size:28rpx;margin-right:8rpx">⚠️</text>
+        <text style="font-size:28rpx;font-weight:700;color:{{item.color}}">{{item.title}}</text>
+      </view>
+      <text wx:if="{{item.text}}" style="font-size:24rpx;color:rgba(255,255,255,0.7);line-height:1.5;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden">{{item.text}}</text>
+      <text wx:if="{{item.sender}}" style="font-size:20rpx;color:rgba(255,255,255,0.4);margin-top:8rpx;display:block">发布：{{item.sender}}</text>
+    </view>
+  </view>
+  <!-- 空气质量 -->
+  <view wx:if="{{wd.airQuality}}" style="margin:0 32rpx 20rpx;background:rgba(255,255,255,0.08);border-radius:16rpx;padding:28rpx">
+    <text style="font-size:28rpx;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:20rpx;display:block">🌬️ 空气质量</text>
+    <view style="display:flex;align-items:center;margin-bottom:20rpx">
+      <text style="font-size:56rpx;font-weight:800;color:{{wd.airQuality.color}};margin-right:16rpx">{{wd.airQuality.aqi}}</text>
+      <view style="display:flex;flex-direction:column">
+        <text style="font-size:26rpx;font-weight:600;color:{{wd.airQuality.color}}">{{wd.airQuality.emoji}} {{wd.airQuality.category}}</text>
+        <text wx:if="{{wd.airQuality.primary}}" style="font-size:22rpx;color:rgba(255,255,255,0.5);margin-top:4rpx">首要：{{wd.airQuality.primary}}</text>
+      </view>
+    </view>
+    <view style="display:flex;flex-wrap:wrap;gap:12rpx">
+      <view style="flex:1;min-width:130rpx;background:rgba(255,255,255,0.06);border-radius:10rpx;padding:16rpx 10rpx;text-align:center"><text style="font-size:20rpx;color:rgba(255,255,255,0.5);display:block">PM2.5</text><text style="font-size:28rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block;margin:4rpx 0">{{wd.airQuality.pm2p5}}</text><text style="font-size:18rpx;color:rgba(255,255,255,0.4);display:block">μg/m³</text></view>
+      <view style="flex:1;min-width:130rpx;background:rgba(255,255,255,0.06);border-radius:10rpx;padding:16rpx 10rpx;text-align:center"><text style="font-size:20rpx;color:rgba(255,255,255,0.5);display:block">PM10</text><text style="font-size:28rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block;margin:4rpx 0">{{wd.airQuality.pm10}}</text><text style="font-size:18rpx;color:rgba(255,255,255,0.4);display:block">μg/m³</text></view>
+      <view style="flex:1;min-width:130rpx;background:rgba(255,255,255,0.06);border-radius:10rpx;padding:16rpx 10rpx;text-align:center"><text style="font-size:20rpx;color:rgba(255,255,255,0.5);display:block">O₃</text><text style="font-size:28rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block;margin:4rpx 0">{{wd.airQuality.o3}}</text><text style="font-size:18rpx;color:rgba(255,255,255,0.4);display:block">μg/m³</text></view>
+      <view style="flex:1;min-width:130rpx;background:rgba(255,255,255,0.06);border-radius:10rpx;padding:16rpx 10rpx;text-align:center"><text style="font-size:20rpx;color:rgba(255,255,255,0.5);display:block">NO₂</text><text style="font-size:28rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block;margin:4rpx 0">{{wd.airQuality.no2}}</text><text style="font-size:18rpx;color:rgba(255,255,255,0.4);display:block">μg/m³</text></view>
+      <view style="flex:1;min-width:130rpx;background:rgba(255,255,255,0.06);border-radius:10rpx;padding:16rpx 10rpx;text-align:center"><text style="font-size:20rpx;color:rgba(255,255,255,0.5);display:block">SO₂</text><text style="font-size:28rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block;margin:4rpx 0">{{wd.airQuality.so2}}</text><text style="font-size:18rpx;color:rgba(255,255,255,0.4);display:block">μg/m³</text></view>
+      <view style="flex:1;min-width:130rpx;background:rgba(255,255,255,0.06);border-radius:10rpx;padding:16rpx 10rpx;text-align:center"><text style="font-size:20rpx;color:rgba(255,255,255,0.5);display:block">CO</text><text style="font-size:28rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block;margin:4rpx 0">{{wd.airQuality.co}}</text><text style="font-size:18rpx;color:rgba(255,255,255,0.4);display:block">mg/m³</text></view>
+    </view>
+  </view>
+  <!-- 未来2小时降水 -->
+  <view wx:if="{{wd.minutely}}" style="margin:0 32rpx 20rpx;background:rgba(255,255,255,0.08);border-radius:16rpx;padding:28rpx">
+    <text style="font-size:28rpx;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:12rpx;display:block">🌧️ 未来2小时降水</text>
+    <text style="font-size:24rpx;color:rgba(255,255,255,0.7);margin-bottom:20rpx;display:block">{{wd.minutely.summary}}</text>
+    <view wx:if="{{wd.minutely.items.length > 0}}">
+      <view style="display:flex;align-items:flex-end;height:80rpx;gap:3rpx;padding:0 4rpx">
+        <view wx:for="{{wd.minutely.items}}" wx:key="index"
+              style="flex:1;height:{{item.height}}rpx;background:{{item.color}};border-radius:3rpx;min-height:4rpx;opacity:0.85"></view>
+      </view>
+      <view style="display:flex;justify-content:space-between;padding-top:10rpx">
+        <text style="font-size:20rpx;color:rgba(255,255,255,0.5)">现在</text>
+        <text style="font-size:20rpx;color:rgba(255,255,255,0.5)">30min</text>
+        <text style="font-size:20rpx;color:rgba(255,255,255,0.5)">1h</text>
+        <text style="font-size:20rpx;color:rgba(255,255,255,0.5)">2h</text>
+      </view>
+    </view>
+  </view>
+  <!-- 天气网格 -->
+  <view class="wd-grid">
+    <view class="wd-cell"><text class="wd-ci">💧</text><text class="wd-cv">{{wd.humidity}}</text><text class="wd-cl">湿度</text></view>
+    <view class="wd-cell"><text class="wd-ci">🌬️</text><text class="wd-cv">{{wd.windSpeed}}</text><text class="wd-cl">{{wd.windDir}}</text></view>
+    <view class="wd-cell"><text class="wd-ci">🌡️</text><text class="wd-cv">{{wd.pressure}}</text><text class="wd-cl">气压</text></view>
+    <view class="wd-cell"><text class="wd-ci">👁️</text><text class="wd-cv">{{wd.visibility}}</text><text class="wd-cl">能见度</text></view>
+    <view class="wd-cell"><text class="wd-ci">☁️</text><text class="wd-cv">{{wd.cloudiness}}</text><text class="wd-cl">云量</text></view>
+  </view>
+  <!-- 7天预报 -->
+  <view wx:if="{{wd.forecast7d.length > 0}}" style="margin:0 32rpx 20rpx;background:rgba(255,255,255,0.08);border-radius:16rpx;padding:28rpx">
+    <text style="font-size:28rpx;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:20rpx;display:block">📅 7天预报</text>
+    <view wx:for="{{wd.forecast7d}}" wx:key="index"
+          style="display:flex;align-items:center;padding:14rpx 0;border-bottom:{{index < wd.forecast7d.length - 1 ? '1rpx solid rgba(255,255,255,0.06)' : 'none'}}">
+      <text style="width:80rpx;font-size:24rpx;color:rgba(255,255,255,0.8)">{{item.dayName}}</text>
+      <text style="font-size:36rpx;width:56rpx;text-align:center">{{item.iconDay}}</text>
+      <view style="flex:1;padding:0 20rpx;position:relative;height:12rpx">
+        <view style="position:absolute;top:0;left:0;right:0;height:12rpx;background:rgba(255,255,255,0.08);border-radius:6rpx"></view>
+        <view style="position:absolute;top:0;height:12rpx;border-radius:6rpx;background:linear-gradient(90deg,#5B9BD5,#FFB347);left:{{item.barLeft}}%;width:{{item.barWidth}}%"></view>
+      </view>
+      <text style="font-size:22rpx;color:rgba(255,255,255,0.5);width:100rpx;text-align:right">{{item.tempMin}}°</text>
+      <text style="font-size:22rpx;color:rgba(255,255,255,0.9);width:70rpx;text-align:right;font-weight:600">{{item.tempMax}}°</text>
+    </view>
+  </view>
+  <!-- 生活指数 -->
+  <view wx:if="{{wd.indices.length > 0}}" style="margin:0 32rpx 20rpx;background:rgba(255,255,255,0.08);border-radius:16rpx;padding:28rpx">
+    <text style="font-size:28rpx;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:20rpx;display:block">💡 生活指数</text>
+    <view style="display:grid;grid-template-columns:1fr 1fr;gap:16rpx">
+      <view wx:for="{{wd.indices}}" wx:key="index"
+            style="background:rgba(255,255,255,0.06);border-radius:12rpx;padding:24rpx;overflow:hidden;min-width:0">
+        <view style="display:flex;align-items:center;margin-bottom:10rpx">
+          <text style="font-size:32rpx;margin-right:10rpx;flex-shrink:0">{{item.icon}}</text>
+          <text style="font-size:24rpx;font-weight:600;color:rgba(255,255,255,0.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">{{item.name}}</text>
+        </view>
+        <text style="font-size:28rpx;font-weight:700;color:#FFD700;display:block;margin-bottom:8rpx;word-break:break-all">{{item.category}}</text>
+        <text style="font-size:22rpx;color:rgba(255,255,255,0.55);line-height:1.6;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;word-break:break-all">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+  <!-- 生活建议 -->
+  <view wx:if="{{wd.indices.length === 0 && wd.advices.length > 0}}" style="margin:0 32rpx 20rpx;background:rgba(255,255,255,0.08);border-radius:16rpx;padding:28rpx">
+    <text style="font-size:28rpx;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:20rpx;display:block">💡 生活建议</text>
+    <view class="wa-list">
+      <view class="wa-card" wx:for="{{wd.advices}}" wx:key="index">
+        <text class="wa-icon">{{item.icon}}</text>
+        <view class="wa-info"><text class="wa-name">{{item.title}}</text><text class="wa-text">{{item.text}}</text></view>
+      </view>
+    </view>
+  </view>
+  <!-- 天文信息 -->
+  <view wx:if="{{wd.astronomy}}" style="margin:0 32rpx 20rpx;background:rgba(255,255,255,0.08);border-radius:16rpx;padding:28rpx">
+    <text style="font-size:28rpx;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:20rpx;display:block">🌅 天文信息</text>
+    <view style="display:grid;grid-template-columns:repeat(2,1fr);gap:16rpx">
+      <view style="background:rgba(255,255,255,0.06);border-radius:14rpx;padding:24rpx 20rpx;display:flex;flex-direction:column;align-items:center">
+        <text style="font-size:44rpx;display:block;margin-bottom:10rpx">🌅</text>
+        <text style="font-size:22rpx;color:rgba(255,255,255,0.5);display:block;margin-bottom:6rpx">日出</text>
+        <text style="font-size:32rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block">{{wd.astronomy.sunrise}}</text>
+      </view>
+      <view style="background:rgba(255,255,255,0.06);border-radius:14rpx;padding:24rpx 20rpx;display:flex;flex-direction:column;align-items:center">
+        <text style="font-size:44rpx;display:block;margin-bottom:10rpx">🌇</text>
+        <text style="font-size:22rpx;color:rgba(255,255,255,0.5);display:block;margin-bottom:6rpx">日落</text>
+        <text style="font-size:32rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block">{{wd.astronomy.sunset}}</text>
+      </view>
+      <view wx:if="{{wd.astronomy.moonrise !== '--'}}" style="background:rgba(255,255,255,0.06);border-radius:14rpx;padding:24rpx 20rpx;display:flex;flex-direction:column;align-items:center">
+        <text style="font-size:44rpx;display:block;margin-bottom:10rpx">🌙</text>
+        <text style="font-size:22rpx;color:rgba(255,255,255,0.5);display:block;margin-bottom:6rpx">月出</text>
+        <text style="font-size:32rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block">{{wd.astronomy.moonrise}}</text>
+      </view>
+      <view wx:if="{{wd.astronomy.moonPhase}}" style="background:rgba(255,255,255,0.06);border-radius:14rpx;padding:24rpx 20rpx;display:flex;flex-direction:column;align-items:center">
+        <text style="font-size:44rpx;display:block;margin-bottom:10rpx">{{wd.astronomy.moonPhaseIcon}}</text>
+        <text style="font-size:22rpx;color:rgba(255,255,255,0.5);display:block;margin-bottom:6rpx">{{wd.astronomy.moonPhase}}</text>
+        <text style="font-size:28rpx;font-weight:700;color:rgba(255,255,255,0.9);display:block;text-align:center">{{wd.astronomy.moonIllumination}}</text>
+      </view>
+    </view>
+  </view>
+  <!-- 央视天气按钮 -->
+  <view style="margin:0 32rpx 20rpx">
+    <view class="astro-link-btn" bindtap="openCCTVWeather">
+      <view class="astro-link-glow"></view>
+      <view class="astro-link-content">
+        <view class="astro-link-icon-wrap"><text class="astro-link-icon">🌐</text></view>
+        <view class="astro-link-info">
+          <text class="astro-link-title">查看央视天气</text>
+          <text class="astro-link-desc">了解更多权威天气资讯</text>
+        </view>
+        <view class="astro-link-arrow-wrap"><text class="astro-link-arrow">›</text></view>
+      </view>
+    </view>
+  </view>
+  <view class="wd-footer"><text class="wd-ft">天气数据由 {{wd.source || '天气服务'}} 提供</text></view>
+  <view style="height:60rpx"></view>
+</scroll-view>
+</view>
+
+<!-- 可爱提示弹窗 -->
+<view class="cute-mask" wx:if="{{showCutePopup}}" bindtap="closeCutePopup"></view>
+<view class="cute-popup" wx:if="{{showCutePopup}}" catchtap="">
+<view class="cute-deco">
+  <text class="cute-sparkle cs1">✨</text><text class="cute-sparkle cs2">🌸</text>
+  <text class="cute-sparkle cs3">⭐</text><text class="cute-sparkle cs4">💫</text>
+</view>
+<view class="cute-blob cute-blob1"></view>
+<view class="cute-blob cute-blob2"></view>
+<text class="cute-emoji">{{cutePopupEmoji}}</text>
+<text class="cute-title">{{cutePopupTitle}}</text>
+<text class="cute-desc">{{cutePopupDesc}}</text>
+<view class="cute-btn" bindtap="closeCutePopup"><text class="cute-btn-text">知道啦~ 💕</text></view>
+<view class="cute-hearts">
+  <text class="cute-heart ch1">💗</text>
+  <text class="cute-heart ch2">💕</text>
+  <text class="cute-heart ch3">💗</text>
+</view>
+</view>
+
+<!-- 位置权限弹窗 -->
+<view class="loc-modal-mask" wx:if="{{showLocationModal}}">
+<view class="loc-modal" catchtap="">
+  <view class="loc-deco">
+    <text class="loc-sparkle ls1">✨</text><text class="loc-sparkle ls2">⭐</text>
+    <text class="loc-sparkle ls3">💫</text><text class="loc-sparkle ls4">🌟</text>
+    <text class="loc-sparkle ls5">✨</text><text class="loc-sparkle ls6">💖</text>
+  </view>
+  <view class="loc-illustration">
+    <view class="loc-illu-ring"></view>
+    <text class="loc-main-emoji">🌍</text>
+    <view class="loc-floating-icons">
+      <text class="lfi lfi1">🌤️</text><text class="lfi lfi2">🌡️</text>
+      <text class="lfi lfi3">🌧️</text><text class="lfi lfi4">📍</text>
+    </view>
+  </view>
+  <text class="loc-title">开启天气小助手</text>
+  <text class="loc-desc">获取你的位置后，就能为你展示<br/>实时天气和贴心出行建议啦~</text>
+  <view class="loc-features">
+    <view class="loc-feat"><text>🌤️ 实时天气</text></view>
+    <view class="loc-feat"><text>🌡️ 温度提醒</text></view>
+    <view class="loc-feat"><text>🌧️ 出行建议</text></view>
+    <view class="loc-feat"><text>📍 所在城市</text></view>
+  </view>
+  <view class="loc-privacy">
+    <text class="lp-icon">🔒</text>
+    <text class="lp-text">位置信息仅用于天气查询，不会泄露给第三方</text>
+  </view>
+  <view class="loc-btns">
+    <view class="loc-btn loc-btn-skip" bindtap="onDenyLocation"><text>下次再说</text></view>
+    <view class="loc-btn loc-btn-allow" bindtap="onAllowLocation"><text>好的呀~ ✨</text></view>
+  </view>
+</view>
+</view>

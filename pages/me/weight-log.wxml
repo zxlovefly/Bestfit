@@ -1,0 +1,10 @@
+<view class="weight-log-wrap">
+  <view class="head">
+    <text class="back" bindtap="back">‹</text>
+    <text class="title">记录今日体重</text>
+  </view>
+  <view class="input-box">
+    <input placeholder="输入今日体重(kg)" type="number" step="0.1" bindinput="setWeight" value="{{weight}}"/>
+    <button class="btn btn-primary" bindtap="submit">保存</button>
+  </view>
+</view>

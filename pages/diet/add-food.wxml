@@ -1,0 +1,104 @@
+<view class="af-page">
+  <view class="af-nav">
+    <view class="af-back" bindtap="onBack" hover-class="af-back-h"><text>‹</text></view>
+    <text class="af-title">添加{{mealName}}</text>
+    <view class="af-ph"></view>
+  </view>
+
+  <view class="af-search">
+    <view class="af-sbox">
+      <text class="afs-i">🔍</text>
+      <input class="afs-in" placeholder="搜索食物..." placeholder-class="afs-ph" value="{{keyword}}" bindinput="onSearch"/>
+      <text wx:if="{{keyword}}" class="afs-cl" bindtap="onClearSearch">✕</text>
+    </view>
+    <view class="multi-btn {{multiMode?'multi-on':''}}" bindtap="toggleMultiMode" hover-class="multi-h"><text>{{multiMode?'取消':'多选'}}</text></view>
+  </view>
+
+  <view class="af-body">
+    <scroll-view scroll-y class="af-side" wx:if="{{!isSearch}}" enhanced="{{false}}" show-scrollbar="{{false}}">
+      <view wx:for="{{categories}}" wx:key="key" class="sb-i {{activeCat===item.key?'sb-on':''}}" data-key="{{item.key}}" bindtap="onCatTap">
+        <text class="sb-icon">{{item.icon}}</text><text class="sb-name">{{item.name}}</text>
+      </view>
+    </scroll-view>
+
+    <scroll-view scroll-y class="af-list" enhanced="{{false}}" show-scrollbar="{{false}}">
+      <view wx:if="{{isSearch}}" class="search-hint">找到 <text style="color:var(--pink-deep);font-weight:800">{{foodList.length}}</text> 个结果</view>
+      <view wx:if="{{activeCat==='custom'&&!isSearch}}" class="custom-add" bindtap="onAddCustom" hover-class="custom-add-h"><text class="ca-i">➕</text><text class="ca-t">添加自定义食物</text></view>
+
+      <view wx:for="{{foodList}}" wx:key="id" class="fl-card {{item.selected?'fl-sel':''}}" data-id="{{item.id}}" data-cust="{{item.cat==='自定义'?'1':'0'}}" bindtap="onFoodTap" hover-class="fl-card-h">
+        <!-- ★ 勾选框（多选模式时显示） -->
+        <view wx:if="{{multiMode}}" class="fl-check {{item.selected?'fl-chked':''}}">
+          <text wx:if="{{item.selected}}">✓</text>
+        </view>
+        <view class="fl-icon-box"><text class="fl-icon">{{item.icon}}</text></view>
+        <view class="fl-info">
+          <text class="fl-name">{{item.name}}</text>
+          <view class="fl-tags"><text class="ft ft-c">碳{{item.c}}g</text><text class="ft ft-p">蛋{{item.p}}g</text><text class="ft ft-f">脂{{item.f}}g</text></view>
+        </view>
+        <view class="fl-cal-box"><text class="fl-cal-num">{{item.cal}}</text><text class="fl-cal-unit">千卡/100g</text></view>
+      </view>
+
+      <view wx:if="{{foodList.length===0}}" class="af-empty"><text class="ae-i">{{isSearch?'🔍':'📭'}}</text><text class="ae-t">{{isSearch?'没有找到相关食物':'该分类暂无食物'}}</text></view>
+      <view style="height:200rpx"></view>
+    </scroll-view>
+  </view>
+
+  <!-- ★ 多选底部操作栏 -->
+  <view wx:if="{{multiMode}}" class="ms-bar">
+    <text class="msb-count">已选 {{selectedCount}} 项</text>
+    <view class="msb-add {{selectedCount===0?'msb-dis':''}}" bindtap="openBatchSheet" hover-class="msb-h">添加 ({{selectedCount}})</view>
+  </view>
+
+  <!-- 单选底弹层 -->
+  <view wx:if="{{showSheet}}" class="sh-mask" bindtap="onSheetMask"></view>
+  <view class="sh-sheet {{showSheet?'sh-show':''}}" catchtap="preventBubble">
+    <view class="sh-handle"><view class="sh-bar"></view></view>
+    <block wx:if="{{curFood}}">
+      <view class="sh-head"><text class="sh-emoji">{{curFood.icon}}</text><view class="sh-title"><text class="sh-name">{{curFood.name}}</text><text class="sh-sub">{{curFood.cal}} 千卡 / 100g</text></view></view>
+      <view class="sh-macros">
+        <view class="shm"><text class="shm-icon">🍚</text><text class="shm-v c">{{pvC}}g</text><text class="shm-l">碳水</text></view>
+        <view class="shm"><text class="shm-icon">🥩</text><text class="shm-v p">{{pvP}}g</text><text class="shm-l">蛋白质</text></view>
+        <view class="shm"><text class="shm-icon">🫒</text><text class="shm-v f">{{pvF}}g</text><text class="shm-l">脂肪</text></view>
+      </view>
+      <view class="sh-gram"><view class="sh-stepper"><view class="sh-btn" data-d="-10" bindtap="onStep" hover-class="sh-btn-h">−</view><input class="sh-input" type="number" value="{{grams}}" bindinput="onGramInput"/><view class="sh-btn sh-btn-p" data-d="10" bindtap="onStep" hover-class="sh-btn-h">+</view></view><text class="sh-unit">克</text></view>
+      <view class="sh-quick"><view class="sq {{grams===50?'sq-on':''}}" data-g="50" bindtap="onQuick">50g</view><view class="sq {{grams===100?'sq-on':''}}" data-g="100" bindtap="onQuick">100g</view><view class="sq {{grams===150?'sq-on':''}}" data-g="150" bindtap="onQuick">150g</view><view class="sq {{grams===200?'sq-on':''}}" data-g="200" bindtap="onQuick">200g</view><view class="sq {{grams===300?'sq-on':''}}" data-g="300" bindtap="onQuick">300g</view></view>
+      <view class="sh-cal-dis"><text class="sh-cal-big">{{pvCal}}</text><text class="sh-cal-suf"> 千卡</text></view>
+      <view class="sh-confirm" bindtap="onConfirm" hover-class="sh-confirm-h">添加到{{mealName}}</view>
+    </block>
+  </view>
+
+  <!-- 批量添加底弹层 -->
+  <view wx:if="{{showBatch}}" class="sh-mask" bindtap="onBatchMask"></view>
+  <view class="sh-sheet {{showBatch?'sh-show':''}}" catchtap="preventBubble">
+    <view class="sh-handle"><view class="sh-bar"></view></view>
+    <text class="bt-title">批量添加 {{batchItems.length}} 项食物</text>
+    <scroll-view scroll-y class="bt-scroll">
+      <view wx:for="{{batchItems}}" wx:key="idx" class="bt-item">
+        <text class="bt-emoji">{{item.food.icon}}</text>
+        <text class="bt-name">{{item.food.name}}</text>
+        <view class="bt-stepper">
+          <view class="bt-btn" data-idx="{{index}}" data-d="-10" bindtap="onBatchStep">−</view>
+          <input class="bt-input" type="number" value="{{item.grams}}" data-idx="{{index}}" bindinput="onBatchInput"/>
+          <view class="bt-btn bt-btn-p" data-idx="{{index}}" data-d="10" bindtap="onBatchStep">+</view>
+        </view>
+        <text class="bt-unit">g</text>
+        <text class="bt-cal">{{item.cal}}</text>
+      </view>
+    </scroll-view>
+    <view class="bt-foot">
+      <text class="bt-total">总计 <text class="bt-total-n">{{batchTotalCal}}</text> 千卡</text>
+      <view class="bt-confirm" bindtap="onBatchConfirm" hover-class="sh-confirm-h">确认添加</view>
+    </view>
+  </view>
+
+  <!-- 自定义食物表单 -->
+  <view wx:if="{{showForm}}" class="sh-mask" bindtap="onFormMask"></view>
+  <view class="sh-sheet {{showForm?'sh-show':''}}" catchtap="preventBubble">
+    <view class="sh-handle"><view class="sh-bar"></view></view>
+    <text class="cf-title">添加自定义食物</text>
+    <view class="cf-field"><text class="cf-label">食物名称</text><input class="cf-input" placeholder="如：自制三明治" value="{{cfName}}" data-f="cfName" bindinput="onCfInput"/></view>
+    <view class="cf-field"><text class="cf-label">热量 (千卡/100g)</text><input class="cf-input" type="digit" placeholder="0" value="{{cfCal}}" data-f="cfCal" bindinput="onCfInput"/></view>
+    <view class="cf-row"><view class="cf-field cf-third"><text class="cf-label">碳水(g)</text><input class="cf-input" type="digit" placeholder="0" value="{{cfC}}" data-f="cfC" bindinput="onCfInput"/></view><view class="cf-field cf-third"><text class="cf-label">蛋白(g)</text><input class="cf-input" type="digit" placeholder="0" value="{{cfP}}" data-f="cfP" bindinput="onCfInput"/></view><view class="cf-field cf-third"><text class="cf-label">脂肪(g)</text><input class="cf-input" type="digit" placeholder="0" value="{{cfF}}" data-f="cfF" bindinput="onCfInput"/></view></view>
+    <view class="cf-save" bindtap="onSaveCustom" hover-class="sh-confirm-h">保存食物</view>
+  </view>
+</view>
